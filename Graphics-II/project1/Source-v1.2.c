@@ -36,22 +36,17 @@ GLfloat tempM1T[4][4] = {
         {     0,     1,  -4.5,   4.5}
 };
 
-GLfloat tempPoints[7][3] = {
+GLfloat tempPoints[4][3] = {
     {150, 150, 0},
-    {240, 180, 0},
-    {300, 140, 0},
-    {410, 190, 0},
-    {440, 180, 0},
-    {470, 140, 0},
-    {500, 190, 0},
+    {270, 180, 0},
+    {310, 140, 0},
+    {440, 190, 0}
 };
 
 struct State {
-    bool pointsSet;
-    GLint setPointsLeft;
     Mode mode;
     GLint numOfPoints;
-} currState;
+} state;
 
 bool leftMouseClicked;
 bool movePoint;
@@ -65,8 +60,7 @@ GLint maxWindowY = 480;
 //GLfloat C[4][3];  //C array for cubic curve
 //GLfloat CS[4][4][3];  //C array for cubic surface
 
-GLfloat** C1;
-GLfloat** C2;
+GLfloat** C;
 GLfloat** U;
 GLfloat** V;
 GLfloat** P;
@@ -79,7 +73,6 @@ GLfloat*** CS;
 GLfloat** tempArr;
 GLfloat** tempVert;
 GLfloat** tempEl;
-GLfloat** subP;
 
 void cubicPolynomialCurve(GLint);
 void cubicPolynomialSurface(GLint, GLint);
@@ -134,16 +127,6 @@ void matrixDel(GLfloat** M, GLint rows, GLint cols) {
     free(M);
 }
 
-void submatrix(GLfloat** M, GLfloat** subM, GLint iStart, GLint jStart, GLint rows, GLint cols) {
-    for (int i = iStart; i < rows+iStart; i++) {
-        for (int j = jStart; j < cols+jStart; j++) {
-            subM[i-iStart][j-jStart] = M[i][j];
-        //    printf("%f ", M[i][j]);
-        }
-    }
-   // printf("\n");
-}
-
 void myinit(void)
 {
     tempArr = matrixNew(4, 4);
@@ -152,36 +135,23 @@ void myinit(void)
 
     U = matrixNew(1, 4);  //1x4 matrix
     V = matrixNew(4, 1);  //4x1 matrix
-    C1 = matrixNew(4, 3);
-    C2 = matrixNew(4, 3);
-    p = matrixNew(7, 3);
-    subP = matrixNew(4, 3);
+    C = matrixNew(4, 3);
+    p = matrixNew(4, 3);
     M1 = matrixNew(4, 4);
     M1T = matrixNew(4, 4);
     point = matrixNew(1, 3);
     //matrixMul4x3(M1, p, 4, 4, 3, C);
 
-    currState.mode = CUBIC_CURVES;
-    currState.numOfPoints = 4;
-    currState.pointsSet = false;
-    currState.setPointsLeft = 7;
+    state.mode = CUBIC_CURVES;
+    state.numOfPoints = 4;
     
     for (int i = 0; i < 4; i++) {
-    //    vectorInit(p[i], tempPoints[i], 3);
+        vectorInit(p[i], tempPoints[i], 3);
         vectorInit(M1[i], tempM1[i], 4);
         vectorInit(M1T[i], tempM1T[i], 4);
     }
-
-
-    for (int i = 0; i < 7; i++) {
-        vectorInit(p[i], tempPoints[i], 3);
-    }
-
-    submatrix(p, subP, 0, 0, 4, 3);
-    matrixMul(M1, subP, 4, 4, 3, C1);
-       
-    submatrix(p, subP, 3, 0, 4, 3);
-    matrixMul(M1, subP, 4, 4, 3, C2);
+    
+    matrixMul(M1, p, 4, 4, 3, C);
 
     /*
     for (int i = 0; i < 4; i++) {
@@ -221,23 +191,25 @@ void display()
     glLoadIdentity();
     gluLookAt(xr, yViewer, zr, xref, yref, zref, Vx, Vy, Vz);
 
+    //for points
+  //  glMatrixMode(GL_MODELVIEW);
+ //  glLoadIdentity();
 
     glColor3f(0.3, 0.8, 0.1);
     glPointSize(2.0f);
 
-    switch (currState.mode) {
+    switch (state.mode) {
         case CUBIC_CURVES:
-            if (currState.pointsSet) {
-                cubicPolynomialCurve(300, C1);
-                cubicPolynomialCurve(300, C2);
-            }
+            cubicPolynomialCurve(300);
+
 
             glPointSize(4.0f);
             glColor3f(0.0, 0.0, 0.0);
-            GLint numOfPoints = 7 - currState.setPointsLeft;
             glBegin(GL_POINTS);
-            for (int i = 0; i < numOfPoints; i++)
-                glVertex3fv(p[i]);
+            glVertex3fv(p[0]);
+            glVertex3fv(p[1]);
+            glVertex3fv(p[2]);
+            glVertex3fv(p[3]);
             glEnd();
 
         //    printf("%f\n", p[0][0]);
@@ -294,6 +266,7 @@ void cubicPolynomialSurface(GLint numOfuPoints, GLint numOfvPoints) {
             for (int coord = 0; coord < 3; coord++) {
                 matrixMul(U, CS[coord], 1, 4, 4, tempVert);
                 matrixMul(tempVert, V, 1, 4, 1, tempEl);
+               // printf("(%f)\n", V[0][0]);
                 point[coord] = tempEl[0][0];
             }
 
@@ -306,7 +279,7 @@ void cubicPolynomialSurface(GLint numOfuPoints, GLint numOfvPoints) {
 
 }
 
-void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
+void cubicPolynomialCurve(int numOfPoints) {
     GLfloat step = 1.0f / numOfPoints;
     GLfloat u = 0;
     GLfloat sum, uu;
@@ -330,7 +303,7 @@ void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
 }
 
 void clearMatrices() {
-    switch (currState.mode) {
+    switch (state.mode) {
         case CUBIC_CURVES:
             matrixDel(p, 4, 3);
             break;
@@ -342,53 +315,35 @@ void clearMatrices() {
 }
 
 void mouse_callback_func(int button, int state, int x, int y) {
-    clickX = x;
-    clickY = maxWindowY - y;
-
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
-            if (currState.pointsSet) {
-                leftMouseClicked = true;
+            leftMouseClicked = true;
 
-                printf("(%d, %d)\n", x, y);
+            clickX = x;
+            clickY = maxWindowY - y;
 
-                GLfloat minDist = 12552.0f;
-                GLfloat dist;
-                GLint minI;
-                for (int i = 0; i < 7; i++) {
-                    dist = pow(clickX - p[i][0], 2) + pow(clickY - p[i][1], 2);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        minI = i;
-                    }
+            printf("(%d, %d)\n", x, y);
+
+            GLfloat minDist = 12552.0f;
+            GLfloat dist;
+            GLint minI;
+            for (int i = 0; i < 4; i++) {
+                dist = pow(clickX - p[i][0], 2) + pow(clickY - p[i][1], 2);
+                if (dist < minDist) {
+                    minDist = dist;
+                    minI = i;
                 }
-                if (sqrt(minDist) < MAX_DISTANCE) {
-                    movePoint = true;
-                    mvPntInd = minI;
-                }
-            } else if (currState.setPointsLeft) {  //setting points
-                GLint index = 7 - currState.setPointsLeft;
-                
-                vectorInit(p[index], (GLfloat[]) { clickX, clickY, 0 }, 3);
-                currState.setPointsLeft--;
-
-                printf("(%f, %f)\n", p[index][0], p[index][1]);
-                if (!currState.setPointsLeft) {
-               //     currState.setPointsLeft = 7;
-                    currState.pointsSet = true;
-
-                    submatrix(p, subP, 0, 0, 4, 3);
-                    matrixMul(M1, subP, 4, 4, 3, C1);
-                    submatrix(p, subP, 3, 0, 4, 3);
-                    matrixMul(M1, subP, 4, 4, 3, C2);
-                }
-
-                glutPostRedisplay();
+            }
+            if (sqrt(minDist) < MAX_DISTANCE) {
+                movePoint = true;
+                mvPntInd = minI;
             }
         }
         else if (state == GLUT_UP && leftMouseClicked) {
             leftMouseClicked = false;
             movePoint = false;
+          //  xCurr += x - xStart;
+          //  yCurr += y - yStart;
         }
     }
 }
@@ -396,10 +351,23 @@ void mouse_callback_func(int button, int state, int x, int y) {
 void mouse_motion_callback_func(int x, int y) {
     if (leftMouseClicked) {
 
+      //  x = maxWindowX - x;
         y = maxWindowY - y;
 
         printf("(%d, %d)\n", x, y);
 
+
+        /*
+        GLfloat minDist = 12552.0f;
+        GLfloat dist;
+        GLint minI;
+        for (int i = 0; i < 4; i++) {
+            dist = pow(x - p[i][0], 2) + pow(y - p[i][1], 2);
+            if (dist < minDist) {
+                minDist = dist;
+                minI = i;
+            }
+        } */
         if (movePoint) {
             p[mvPntInd][0] += x - clickX;
             p[mvPntInd][1] += y - clickY;
@@ -407,19 +375,17 @@ void mouse_motion_callback_func(int x, int y) {
             clickX += x - clickX;
             clickY += y - clickY;
 
-            submatrix(p, subP, 0, 0, 4, 3);
-            matrixMul(M1, subP, 4, 4, 3, C1);
-            submatrix(p, subP, 3, 0, 4, 3);
-            matrixMul(M1, subP, 4, 4, 3, C2);
-           // matrixMul(M1, p, 4, 4, 3, C1);
+
+            matrixMul(M1, p, 4, 4, 3, C);
 
             glutPostRedisplay();
         }
+   //     shiftWindow(x - xStart, y - yStart);
     }
 }
 
 void menu(int id) {
-    if (currState.mode == id) {
+    if (state.mode == id) {
         return;
     } else {
         clearMatrices();
@@ -427,12 +393,16 @@ void menu(int id) {
 
     switch (id) {
     case CUBIC_CURVES:
-        p = matrixNew(7, 3);
+        p = matrixNew(4, 3);
 
-        currState.mode = CUBIC_CURVES;
-        currState.numOfPoints = 7;
-        currState.setPointsLeft = 7;
-        currState.pointsSet = false;
+        state.mode = CUBIC_CURVES;
+        state.numOfPoints = 4;
+
+        for (int i = 0; i < 4; i++) {
+            vectorInit(p[i], tempPoints[i], 3);
+        }
+
+        matrixMul(M1, p, 4, 4, 3, C);
 
         break;
 
@@ -445,7 +415,13 @@ void menu(int id) {
         for (int i = 0; i < 3; i++) {
             CS[i] = matrixNew(4, 4);
         }
-
+        /*
+        CS = matrixNew(3, 4);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                CS[i][j] = (GLfloat*) malloc(sizeof(GLfloat) * 4);
+            }
+        }*/
         CSvectorInit(0, 0, (GLfloat[]) { 100, 100, 0 }); //front-left 
         CSvectorInit(0, 3, (GLfloat[]) { 300, 100, 0 }); //front-right
         CSvectorInit(3, 0, (GLfloat[]) { 100, 300, 0 }); //back-left        
@@ -472,15 +448,14 @@ void menu(int id) {
             matrixMul(tempArr, M1T, 4, 4, 4, CS[coord]);
         }
 
-        /*
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 printf("%.2f ", CS[2][i][j]);
             }
             printf("\n");
-        } */
+        }
 
-        currState.mode = CUBIC_SURFACE;
+        state.mode = CUBIC_SURFACE;
 
         break;
 
@@ -539,3 +514,35 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+
+/*
+void matrixMul4x4(float A[4][4], float B[4][4], int aRows, int aCols, int bCols, float R[4][4]) {
+    //    float** R = (float*) malloc(sizeof(float)*rows);
+
+
+    for (int i = 0; i < aRows; i++) {
+        for (int z = 0; z < bCols; z++) {
+            R[i][z] = 0;
+            for (int j = 0; j < aCols; j++) {
+                //   printf("(%d,%d)\n", i, j);
+                R[i][z] += A[i][j] * B[j][z];
+            }
+        }
+    }
+}
+
+void matrixMul4x3(float A[4][4], float B[4][3], int aRows, int aCols, int bCols, float R[4][3]) {
+//    float** R = (float*) malloc(sizeof(float)*rows);
+
+
+    for (int i = 0; i < aRows; i++) {
+        for (int z = 0; z < bCols; z++) {
+            R[i][z] = 0;
+            for (int j = 0; j < aCols; j++) {
+             //   printf("(%d,%d)\n", i, j);
+                R[i][z] += A[i][j] * B[j][z];
+            }
+        }
+    }
+} */
