@@ -1,8 +1,5 @@
 ﻿  Source.c
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(39,36): warning C4013: 'calloc' undefined; assuming extern returning int
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(187,13): warning C4101: 'point': unreferenced local variable
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(206,13): warning C4101: 'sum': unreferenced local variable
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(327,13): warning C4013: 'exit' undefined; assuming extern returning int
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(343,28): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void)'
-  LINK : C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\Debug\project1.exe not found or not built by the last incremental link; performing full link
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(256,21): warning C4101: 'sum': unreferenced local variable
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(290,13): warning C4101: 'sum': unreferenced local variable
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(524,28): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void)'
   project1.vcxproj -> C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\Debug\project1.exe
