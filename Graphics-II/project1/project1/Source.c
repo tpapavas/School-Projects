@@ -147,10 +147,8 @@ void submatrix(GLfloat** M, GLfloat** subM, GLint iStart, GLint jStart, GLint ro
     for (int i = iStart; i < rows+iStart; i++) {
         for (int j = jStart; j < cols+jStart; j++) {
             subM[i-iStart][j-jStart] = M[i][j];
-        //    printf("%f ", M[i][j]);
         }
     }
-   // printf("\n");
 }
 
 void myinit(void)
@@ -181,10 +179,10 @@ void myinit(void)
         vectorInit(M1T[i], tempM1T[i], 4);
     }
 
-
+    /*
     for (int i = 0; i < 7; i++) {
         vectorInit(p[i], tempPoints[i], 3);
-    }
+    } */
 
     submatrix(p, subP, 0, 0, 4, 3);
     matrixMul(M1, subP, 4, 4, 3, C1);
@@ -201,6 +199,7 @@ void myinit(void)
     } */
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MAP1_VERTEX_3);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -215,6 +214,23 @@ void myinit(void)
     glOrtho(0, maxWindowX, 0, maxWindowY, -500, 500);
 }
 
+void _bezier(GLfloat** points, GLint order) {
+    GLfloat tmpP[100];
+    for (int i = 0; i < order; i++) {
+        for (int j = 0; j < 3; j++) {
+            tmpP[i*3 + j] = points[i][j];
+        }
+    }
+    printf("\n");
+
+
+    glMap1f(GL_MAP1_VERTEX_3, 0.0f, 1.0f, 3, order, tmpP);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= 100; i++) {
+        glEvalCoord1f(i / 100.f);
+    }
+    glEnd();
+}
 
 void display()
 {
@@ -236,11 +252,18 @@ void display()
 
     if (currState.mode != CUBIC_SURFACE) {
         if (currState.pointsSet) {
-            if (currState.mode != BEZIER_ORDER_6) {
+            if (currState.mode == CUBIC_CURVES) {
                 cubicPolynomialCurve(300, C1);
                 cubicPolynomialCurve(300, C2);
+            } else if (currState.mode == CUBIC_BEZIER) {
+                //bezier(7, 6, 200);
+                submatrix(p, subP, 0, 0, 4, 3);
+                _bezier(subP, 4);
+                submatrix(p, subP, 3, 0, 4, 3);
+                _bezier(subP, 4);
+
             } else {
-                bezier(7, 6, 200);
+                _bezier(p, 7);
             }
         }
 
@@ -431,6 +454,11 @@ void mouse_callback_func(int button, int state, int x, int y) {
                     matrixMul(M1, subP, 4, 4, 3, C1);
                     submatrix(p, subP, 3, 0, 4, 3);
                     matrixMul(M1, subP, 4, 4, 3, C2);
+                } else if (currState.mode == BEZIER_ORDER_6 && currState.setPointsLeft == 1) {
+                    currState.setPointsLeft = 0;
+                    currState.pointsSet = true;
+
+                    vectorInit(p[6], p[0], 3);
                 }
 
                 glutPostRedisplay();
@@ -470,6 +498,11 @@ void mouse_motion_callback_func(int x, int y) {
                         p[6 - mvPntInd][1] -= y - clickY;
                         break;
                 }
+            }
+
+            if (currState.mode == BEZIER_ORDER_6 && mvPntInd % 6 == 0) {
+                p[6 - mvPntInd][0] = p[mvPntInd][0];
+                p[6 - mvPntInd][1] = p[mvPntInd][1];
             }
 
             clickX += x - clickX;
@@ -522,7 +555,10 @@ void menu(int id) {
         for (int i = 0; i < 3; i++) {
             CS[i] = matrixNew(4, 4);
         }
-
+        for (int i = 0; i < 4; i++) {
+            vectorInit(M1[i], tempM1[i], 4);
+        }
+        /*
         CSvectorInit(0, 0, (GLfloat[]) { 100, 100, 0 }); //front-left 
         CSvectorInit(0, 3, (GLfloat[]) { 300, 100, 0 }); //front-right
         CSvectorInit(3, 0, (GLfloat[]) { 100, 300, 0 }); //back-left        
@@ -542,7 +578,30 @@ void menu(int id) {
         CSvectorInit(2, 3, (GLfloat[]) { 240, 230, -50 });
         
         CSvectorInit(3, 1, (GLfloat[]) { 150, 290, 0 });
-        CSvectorInit(3, 2, (GLfloat[]) { 190, 290, 0 });
+        CSvectorInit(3, 2, (GLfloat[]) { 190, 290, 0 }); */
+
+        ////////NEW POINTS ALERT!!!!!!!!!///////////////
+
+        CSvectorInit(0, 0, (GLfloat[]) { 0, 100, 100 }); //front-left 
+        CSvectorInit(0, 3, (GLfloat[]) { 0, 100, 300 }); //front-right
+        CSvectorInit(3, 0, (GLfloat[]) { 0, 300, 100 }); //back-left        
+        CSvectorInit(3, 3, (GLfloat[]) { 0, 300, 300 }); //back-right
+
+        CSvectorInit(0, 1, (GLfloat[]) { 0, 110, 140 });
+        CSvectorInit(0, 2, (GLfloat[]) { 0, 110, 190 });
+
+        CSvectorInit(1, 0, (GLfloat[]) { 100, 150, 100 });
+        CSvectorInit(1, 1, (GLfloat[]) { 100, 150, 120 });
+        CSvectorInit(1, 2, (GLfloat[]) { 100, 150, 170 });
+        CSvectorInit(1, 3, (GLfloat[]) { 100, 150, 190 });
+
+        CSvectorInit(2, 0, (GLfloat[]) { 50, 230, 100 });
+        CSvectorInit(2, 1, (GLfloat[]) { 50, 230, 120 });
+        CSvectorInit(2, 2, (GLfloat[]) { 50, 230, 200 });
+        CSvectorInit(2, 3, (GLfloat[]) { 50, 230, 240 });
+
+        CSvectorInit(3, 1, (GLfloat[]) { 0, 290, 150 });
+        CSvectorInit(3, 2, (GLfloat[]) { 0, 290, 190 });
 
         for (int coord = 0; coord < 3; coord++) {
             matrixMul(M1, PS[coord], 4, 4, 4, tempArr);
@@ -586,8 +645,8 @@ void menu(int id) {
     case BEZIER_ORDER_6:
         currState.mode = BEZIER_ORDER_6;
         currState.numOfPoints = 7;
-        currState.setPointsLeft = 0;
-        currState.pointsSet = true;
+        currState.setPointsLeft = 7;
+        currState.pointsSet = false;
 
         p = matrixNew(7, 3);
         for (int i = 0; i < 6; i++) {
