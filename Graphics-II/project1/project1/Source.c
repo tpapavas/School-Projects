@@ -20,6 +20,7 @@ GLint windowId;
 typedef enum {
     CUBIC_CURVES,
     CUBIC_SURFACE,
+    BEZIER_ORDER_6,
     CUBIC_BEZIER,
     EXIT
 } Mode;
@@ -90,6 +91,7 @@ GLfloat** subP;
 
 void cubicPolynomialCurve(GLint);
 void cubicPolynomialSurface(GLint, GLint);
+void bezier(GLint, GLint, GLint);
 
 GLfloat** matrixNew(GLint rows, GLint cols) {
     GLfloat** R = (GLfloat**)calloc(rows, sizeof(GLfloat) * rows);
@@ -234,8 +236,12 @@ void display()
 
     if (currState.mode != CUBIC_SURFACE) {
         if (currState.pointsSet) {
-            cubicPolynomialCurve(300, C1);
-            cubicPolynomialCurve(300, C2);
+            if (currState.mode != BEZIER_ORDER_6) {
+                cubicPolynomialCurve(300, C1);
+                cubicPolynomialCurve(300, C2);
+            } else {
+                bezier(7, 6, 200);
+            }
         }
 
         glPointSize(4.0f);
@@ -328,6 +334,49 @@ void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
         glEnd();
     }
 
+}
+
+void bezier(GLint order, GLint degree, GLint numOfPoints) {
+    GLfloat step = 1.0f / numOfPoints;
+    GLfloat sum, uu, u1;
+    GLfloat u = 0.0f;
+
+    GLfloat point[3];
+    GLfloat U[7], U1[7], Sel[7];
+
+    Sel[0] = 1;
+    //Sel[1] = order * (order - 1) / 2;
+    for (int i = 1; i < order; i++) {
+        Sel[i] = Sel[i - 1] * (degree - i + 1) / i;
+    }
+    printf("%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f\n", Sel[0], Sel[1], Sel[2], Sel[3], Sel[4], Sel[5], Sel[6]);
+
+
+    for (int pts = 0; pts < numOfPoints; pts++) {
+        uu = 1.0f;
+        u1 = 1.0f;
+        for (int pow = 0; pow < order; pow++) {
+            U[pow] = uu;
+            U1[pow] = u1;
+            uu *= u;
+            u1 *= (1 - u);
+        }
+        for (int coord = 0; coord < 3; coord++) {
+            sum = 0;
+            for (int i = 0; i < order; i++) {
+                sum += Sel[i] * U[i] * U1[degree - i] * p[i][coord];
+            }
+            point[coord] = sum;
+        }
+
+        u += step;
+
+        printf("(%.1f, %.1f, %.1f)\n", point[0], point[1], point[2]);
+
+        glBegin(GL_POINTS);
+        glVertex3fv(point);
+        glEnd();
+    }
 }
 
 void clearMatrices() {
@@ -521,7 +570,8 @@ void menu(int id) {
         p = matrixNew(7, 3);
         for (int i = 0; i < 7; i++) {
             vectorInit(p[i], tempPoints[i], 3);
-        }
+        }    
+
         for (int i = 0; i < 4; i++) {
             vectorInit(M1[i], tempMB[i], 4);
         }
@@ -531,6 +581,19 @@ void menu(int id) {
         submatrix(p, subP, 3, 0, 4, 3);
         matrixMul(M1, subP, 4, 4, 3, C2);
 
+        break;
+
+    case BEZIER_ORDER_6:
+        currState.mode = BEZIER_ORDER_6;
+        currState.numOfPoints = 7;
+        currState.setPointsLeft = 0;
+        currState.pointsSet = true;
+
+        p = matrixNew(7, 3);
+        for (int i = 0; i < 6; i++) {
+            vectorInit(p[i], tempPoints[i], 3);
+        }
+        vectorInit(p[6], tempPoints[0], 3);
         break;
 
     case EXIT:
@@ -576,6 +639,7 @@ int main(int argc, char** argv)
 
     glutCreateMenu(menu);
     glutAddMenuEntry("1. Cubic Curves", CUBIC_CURVES);
+    glutAddMenuEntry("2. Bezier Order 6", BEZIER_ORDER_6);
     glutAddMenuEntry("3. Cubic Bezier", CUBIC_BEZIER);
     glutAddMenuEntry("4. Cubic Surface", CUBIC_SURFACE);
     glutAddMenuEntry("Exit", EXIT);
