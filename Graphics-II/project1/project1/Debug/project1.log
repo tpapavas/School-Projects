@@ -1,8 +1,8 @@
 ﻿  Source.c
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(256,43): warning C4020: 'cubicPolynomialCurve': too many actual parameters
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(257,43): warning C4020: 'cubicPolynomialCurve': too many actual parameters
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(309,21): warning C4101: 'sum': unreferenced local variable
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(339,57): warning C4029: declared formal parameter list different from definition
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(342,13): warning C4101: 'sum': unreferenced local variable
-C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(694,28): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void)'
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(265,43): warning C4020: 'cubicPolynomialCurve': too many actual parameters
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(266,43): warning C4020: 'cubicPolynomialCurve': too many actual parameters
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(344,21): warning C4101: 'sum': unreferenced local variable
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(374,57): warning C4029: declared formal parameter list different from definition
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(377,13): warning C4101: 'sum': unreferenced local variable
+C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\project1\Source.c(745,28): warning C4113: 'void (__cdecl *)()' differs in parameter lists from 'void (__cdecl *)(void)'
   project1.vcxproj -> C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Graphics-II\project1\Debug\project1.exe

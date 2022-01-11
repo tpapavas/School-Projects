@@ -22,6 +22,7 @@ typedef enum {
     CUBIC_SURFACE,
     BEZIER_ORDER_6,
     CUBIC_BEZIER,
+    SHOW_CONVEX,
     EXIT
 } Mode;
 
@@ -59,6 +60,9 @@ struct State {
     GLint setPointsLeft;
     Mode mode;
     GLint numOfPoints;
+    bool showConvex;
+    GLint lim1;     //for convex hull (bezier only)
+    GLint lim2;     //for convex hull (bezier only)
 } currState;
 
 bool leftMouseClicked;
@@ -172,6 +176,9 @@ void myinit(void)
     currState.numOfPoints = 4;
     currState.pointsSet = false;
     currState.setPointsLeft = 7;
+    currState.showConvex = false;
+    currState.lim1 = 0;
+    currState.lim2 = -1;
     
     for (int i = 0; i < 4; i++) {
     //    vectorInit(p[i], tempPoints[i], 3);
@@ -247,10 +254,12 @@ void display()
     gluLookAt(xr, yViewer, zr, xref, yref, zref, Vx, Vy, Vz);
 
 
-    glColor3f(0.3, 0.8, 0.1);
-    glPointSize(2.0f);
 
     if (currState.mode != CUBIC_SURFACE) {
+        glColor3f(0.3, 0.8, 0.1);
+        glPointSize(2.0f);
+
+
         if (currState.pointsSet) {
             if (currState.mode == CUBIC_CURVES) {
                 cubicPolynomialCurve(300, C1);
@@ -275,7 +284,33 @@ void display()
             glVertex3fv(p[i]);
         glEnd();
 
+
+        //print convex hull
+     //   GLint lim1 = currState.mode == CUBIC_BEZIER ? 4 : currState.mode == BEZIER_ORDER_6 ? 7 : 0;
+      //  GLint lim2 = currState.mode == CUBIC_BEZIER ? 7 : -1;
+        if (currState.showConvex) {
+            glColor3f(0.85, 0.85, 0.85);
+            for (int i = 0; i < currState.lim1; i++) {
+                for (int j = i; j < currState.lim1; j++) {
+                    glBegin(GL_LINES);
+                    glVertex3fv(p[i]);
+                    glVertex3fv(p[j]);
+                    glEnd();
+                }
+            }
+            for (int i = currState.lim1 - 1; i < currState.lim2; i++) {
+                for (int j = i; j < currState.lim2; j++) {
+                    glBegin(GL_LINES);
+                    glVertex3fv(p[i]);
+                    glVertex3fv(p[j]);
+                    glEnd();
+                }
+            }
+        }
     } else {
+        glColor3f(0.3, 0.8, 0.1);
+        glPointSize(2.0f);
+
         cubicPolynomialSurface(200, 200);
 
         glPointSize(4.0f);
@@ -341,6 +376,7 @@ void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
     GLfloat u = 0;
     GLfloat sum, uu;
 
+    glBegin(GL_LINE_STRIP);
     for (int i = 0; i < numOfPoints; i++) {
         uu = 1.0f;
         for (int pow = 0; pow < 4; pow++) {
@@ -352,10 +388,11 @@ void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
 
      //   printf("(%.1f, %.1f, %.1f)\n", point[0][0], point[0][1], point[0][2]);
 
-        glBegin(GL_POINTS);
+        //glBegin(GL_POINTS);
         glVertex3fv(point[0]);
-        glEnd();
+        //glEnd();
     }
+    glEnd();
 
 }
 
@@ -522,18 +559,20 @@ void mouse_motion_callback_func(int x, int y) {
 void menu(int id) {
     if (currState.mode == id) {
         return;
-    } else {
-        clearMatrices();
     }
 
     switch (id) {
     case CUBIC_CURVES:
+        clearMatrices();
+
         p = matrixNew(7, 3);
 
         currState.mode = CUBIC_CURVES;
         currState.numOfPoints = 7;
         currState.setPointsLeft = 7;
         currState.pointsSet = false;
+        currState.lim1 = 0;
+        currState.lim2 = -1;
 
         for (int i = 0; i < 4; i++) {
             vectorInit(M1[i], tempM1[i], 4);
@@ -625,6 +664,8 @@ void menu(int id) {
         currState.numOfPoints = 7;
         currState.setPointsLeft = 0;
         currState.pointsSet = true;
+        currState.lim1 = 4;
+        currState.lim2 = 7;
         
         p = matrixNew(7, 3);
         for (int i = 0; i < 7; i++) {
@@ -647,12 +688,22 @@ void menu(int id) {
         currState.numOfPoints = 7;
         currState.setPointsLeft = 7;
         currState.pointsSet = false;
+        currState.lim1 = 7;
+        currState.lim2 = -1;
 
         p = matrixNew(7, 3);
         for (int i = 0; i < 6; i++) {
             vectorInit(p[i], tempPoints[i], 3);
         }
         vectorInit(p[6], tempPoints[0], 3);
+        break;
+
+    case SHOW_CONVEX:
+        if (currState.mode == CUBIC_BEZIER || currState.mode == BEZIER_ORDER_6) {
+            currState.showConvex = !currState.showConvex;
+        } else {
+            return;
+        }
         break;
 
     case EXIT:
@@ -696,11 +747,14 @@ int main(int argc, char** argv)
     glutMouseFunc(mouse_callback_func);
     glutMotionFunc(mouse_motion_callback_func);
 
+    GLint bezierMenu = glutCreateMenu(menu);
+    glutAddMenuEntry("• Bezier Order 6", BEZIER_ORDER_6);
+    glutAddMenuEntry("• Cubic Bezier", CUBIC_BEZIER);
+    glutAddMenuEntry("Show/Hide Convex Hull", SHOW_CONVEX);
     glutCreateMenu(menu);
-    glutAddMenuEntry("1. Cubic Curves", CUBIC_CURVES);
-    glutAddMenuEntry("2. Bezier Order 6", BEZIER_ORDER_6);
-    glutAddMenuEntry("3. Cubic Bezier", CUBIC_BEZIER);
-    glutAddMenuEntry("4. Cubic Surface", CUBIC_SURFACE);
+    glutAddMenuEntry("• Cubic Curves", CUBIC_CURVES);
+    glutAddSubMenu("- Bezier", bezierMenu);
+    glutAddMenuEntry("• Cubic Surface", CUBIC_SURFACE);
     glutAddMenuEntry("Exit", EXIT);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
