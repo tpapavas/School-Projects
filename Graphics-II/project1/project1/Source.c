@@ -23,7 +23,7 @@ GLint maxWindowY = 480;
 typedef enum {
     CUBIC_CURVES,
     CUBIC_SURFACE,
-    BEZIER_ORDER_6,
+    BEZIER_ORDER_7,
     CUBIC_BEZIER,
     SHOW_CONVEX,
     EXIT
@@ -578,7 +578,7 @@ void mouse_callback_func(int button, int state, int x, int y) {
                         submatrix(ep, subP, 3, 0, 4, 3);
                         matrixMul(M1, subP, 4, 4, 3, C2);
                     } */
-                } else if (currState.mode == BEZIER_ORDER_6 && currState.setPointsLeft == 1) {
+                } else if (currState.mode == BEZIER_ORDER_7 && currState.setPointsLeft == 1) {
                     currState.setPointsLeft = 0;
                     currState.pointsSet = true;
 
@@ -649,7 +649,7 @@ void mouse_motion_callback_func(int x, int y) {
                 return;
             }
 
-            if (currState.mode == BEZIER_ORDER_6 && mvPntInd % 6 == 0) {  //1st and last points are the same. move properly
+            if (currState.mode == BEZIER_ORDER_7 && mvPntInd % 6 == 0) {  //1st and last points are the same. move properly
                 ep[6 - mvPntInd][0] = ep[mvPntInd][0];
                 ep[6 - mvPntInd][1] = ep[mvPntInd][1];
             }
@@ -672,6 +672,11 @@ void mouse_motion_callback_func(int x, int y) {
 void menu(int id) {
     if (currState.mode == id) {
         return;
+    }
+
+    if (id != SHOW_CONVEX) {
+        theta = 0;
+        yViewer = 0;
     }
 
     switch (id) {
@@ -751,6 +756,7 @@ void menu(int id) {
         currState.pointsSet = true;
         currState.lim1 = 4;
         currState.lim2 = 7;
+        currState.showConvex = false;
         
         p = matrixNew(7, 3);
         for (int i = 0; i < 7; i++) {
@@ -764,13 +770,14 @@ void menu(int id) {
 
         break;
 
-    case BEZIER_ORDER_6:
-        currState.mode = BEZIER_ORDER_6;
+    case BEZIER_ORDER_7:
+        currState.mode = BEZIER_ORDER_7;
         currState.numOfPoints = 7;
         currState.setPointsLeft = 7;
         currState.pointsSet = false;
         currState.lim1 = 7;
         currState.lim2 = -1;
+        currState.showConvex = false;
 
         ep = matrixNew(7, 3);
         for (int i = 0; i < 6; i++) {
@@ -802,7 +809,7 @@ void menu(int id) {
         break;
 
     case SHOW_CONVEX:
-        if (currState.mode == CUBIC_BEZIER || currState.mode == BEZIER_ORDER_6) {
+        if (currState.mode == CUBIC_BEZIER || currState.mode == BEZIER_ORDER_7) {
             currState.showConvex = !currState.showConvex;
         } else {
             return;
@@ -851,7 +858,7 @@ int main(int argc, char** argv)
     glutMotionFunc(mouse_motion_callback_func);
 
     GLint bezierMenu = glutCreateMenu(menu);
-    glutAddMenuEntry("• Bezier Order 6", BEZIER_ORDER_6);
+    glutAddMenuEntry("• Bezier Order 7", BEZIER_ORDER_7);
     glutAddMenuEntry("• Cubic Bezier", CUBIC_BEZIER);
     glutAddMenuEntry("Show/Hide Convex Hull", SHOW_CONVEX);
     glutCreateMenu(menu);
