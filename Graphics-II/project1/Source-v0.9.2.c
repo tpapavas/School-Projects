@@ -23,7 +23,6 @@ typedef enum {
     BEZIER_ORDER_6,
     CUBIC_BEZIER,
     SHOW_CONVEX,
-    CUBIC_CURVES_BEZ,
     EXIT
 } Mode;
 
@@ -44,12 +43,6 @@ GLfloat tempMB[4][4] = {
         { -3,  3,  0,  0},
         {  3, -6,  3,  0},
         { -1,  3, -3,  1}
-};
-GLfloat tempMBIn[4][4] = {
-        {     1,     0,     0,     0},
-        {     1, 1/3.0,     0,     0},
-        {     1, 2/3.0, 1/3.0,     0},
-        {     1,     1,     1,     1}
 };
 
 GLfloat tempPoints[7][3] = {
@@ -293,6 +286,8 @@ void display()
 
 
         //print convex hull
+     //   GLint lim1 = currState.mode == CUBIC_BEZIER ? 4 : currState.mode == BEZIER_ORDER_6 ? 7 : 0;
+      //  GLint lim2 = currState.mode == CUBIC_BEZIER ? 7 : -1;
         if (currState.showConvex) {
             glColor3f(0.85, 0.85, 0.85);
             for (int i = 0; i < currState.lim1; i++) {
@@ -382,7 +377,7 @@ void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
     GLfloat sum, uu;
 
     glBegin(GL_LINE_STRIP);
-    for (int i = 0; i <= numOfPoints; i++) {
+    for (int i = 0; i < numOfPoints; i++) {
         uu = 1.0f;
         for (int pow = 0; pow < 4; pow++) {
             U[0][pow] = uu;
@@ -492,36 +487,10 @@ void mouse_callback_func(int button, int state, int x, int y) {
                //     currState.setPointsLeft = 7;
                     currState.pointsSet = true;
 
-                    if (currState.mode == CUBIC_CURVES_BEZ) {
-                        currState.mode = CUBIC_BEZIER;
-                        submatrix(p, C1, 0, 0, 4, 3);
-                        matrixMul(M1, C1, 4, 4, 3, subP);
-
-                        printf("\n");
-                        for (int i = 0; i < 4; i++) {
-                            for (int j = 0; j < 3; j++) {
-                                p[i][j] = subP[i][j];
-                            }
-                            printf("(%f, %f)\n", p[i][0], p[i][1]);
-                        }
-
-                        submatrix(p, C1, 3, 0, 4, 3);
-                        matrixMul(M1, C1, 4, 4, 3, subP);
-
-                        for (int i = 3; i < 7; i++) {
-                            for (int j = 0; j < 3; j++) {
-                                p[i][j] = subP[i - 3][j];
-                            }
-                        }
-
-
-                    } else {
-                        submatrix(p, subP, 0, 0, 4, 3);
-                        matrixMul(M1, subP, 4, 4, 3, C1);
-                        submatrix(p, subP, 3, 0, 4, 3);
-                        matrixMul(M1, subP, 4, 4, 3, C2);
-                    }
-
+                    submatrix(p, subP, 0, 0, 4, 3);
+                    matrixMul(M1, subP, 4, 4, 3, C1);
+                    submatrix(p, subP, 3, 0, 4, 3);
+                    matrixMul(M1, subP, 4, 4, 3, C2);
                 } else if (currState.mode == BEZIER_ORDER_6 && currState.setPointsLeft == 1) {
                     currState.setPointsLeft = 0;
                     currState.pointsSet = true;
@@ -628,6 +597,29 @@ void menu(int id) {
         for (int i = 0; i < 4; i++) {
             vectorInit(M1[i], tempM1[i], 4);
         }
+        /*
+        CSvectorInit(0, 0, (GLfloat[]) { 100, 100, 0 }); //front-left 
+        CSvectorInit(0, 3, (GLfloat[]) { 300, 100, 0 }); //front-right
+        CSvectorInit(3, 0, (GLfloat[]) { 100, 300, 0 }); //back-left        
+        CSvectorInit(3, 3, (GLfloat[]) { 300, 300, 0 }); //back-right
+        
+        CSvectorInit(0, 1, (GLfloat[]) { 140, 110, 0 });
+        CSvectorInit(0, 2, (GLfloat[]) { 190, 110, 0 });
+
+        CSvectorInit(1, 0, (GLfloat[]) { 100, 150, -100 });
+        CSvectorInit(1, 1, (GLfloat[]) { 120, 150, -100 });
+        CSvectorInit(1, 2, (GLfloat[]) { 170, 150, -100 });
+        CSvectorInit(1, 3, (GLfloat[]) { 190, 150, -100 });
+
+        CSvectorInit(2, 0, (GLfloat[]) { 100, 230, -50 });
+        CSvectorInit(2, 1, (GLfloat[]) { 120, 230, -50 });
+        CSvectorInit(2, 2, (GLfloat[]) { 200, 230, -50 });
+        CSvectorInit(2, 3, (GLfloat[]) { 240, 230, -50 });
+        
+        CSvectorInit(3, 1, (GLfloat[]) { 150, 290, 0 });
+        CSvectorInit(3, 2, (GLfloat[]) { 190, 290, 0 }); */
+
+        ////////NEW POINTS ALERT!!!!!!!!!///////////////
 
         CSvectorInit(0, 0, (GLfloat[]) { 0, 100, 100 }); //front-left 
         CSvectorInit(0, 3, (GLfloat[]) { 0, 100, 300 }); //front-right
@@ -714,36 +706,6 @@ void menu(int id) {
         }
         break;
 
-    case CUBIC_CURVES_BEZ:
-        p = matrixNew(7, 3);
-
-        currState.mode = CUBIC_CURVES_BEZ;
-        currState.numOfPoints = 7;
-        currState.setPointsLeft = 7;
-        currState.pointsSet = false;
-        currState.lim1 = 0;
-        currState.lim2 = -1;
-
-        for (int i = 0; i < 4; i++) {
-            vectorInit(M1[i], tempM1[i], 4);
-        }
-        for (int i = 0; i < 4; i++) {
-            vectorInit(M1T[i], tempMBIn[i], 4);
-        }
-
-        matrixMul(M1T, M1, 4, 4, 4, tempArr);  //Mb-1 x M
-        submatrix(tempArr, M1, 0, 0, 4, 4);
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                printf("%.1f ", M1[i][j]);
-            }
-            printf("\n");
-        }
-        
-
-        break;
-
     case EXIT:
         glutDestroyWindow(windowId);
         exit(0);
@@ -791,7 +753,6 @@ int main(int argc, char** argv)
     glutAddMenuEntry("Show/Hide Convex Hull", SHOW_CONVEX);
     glutCreateMenu(menu);
     glutAddMenuEntry("• Cubic Curves", CUBIC_CURVES);
-    glutAddMenuEntry("• Cubic Curves (w Bezier)", CUBIC_CURVES_BEZ);
     glutAddSubMenu("- Bezier", bezierMenu);
     glutAddMenuEntry("• Cubic Surface", CUBIC_SURFACE);
     glutAddMenuEntry("Exit", EXIT);
