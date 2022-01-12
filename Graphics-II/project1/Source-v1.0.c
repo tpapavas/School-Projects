@@ -149,12 +149,12 @@ void matrixMul(GLfloat** A, GLfloat** B, int aRows, int aCols, int bCols, GLfloa
  */
 void vectorInit(GLfloat* V, GLfloat arr[], GLint size) {
     for (int i = 0; i < size; i++) {
-        V[i] = arr[i];
+            V[i] = arr[i];
     }
 }
 
 /**
- * Copies a 1D array[3] (coords of a 3d point) to proper position on
+ * Copies a 1D array[3] (coords of a 3d point) to proper position on 
  * surface points array (PS)
  */
 void CSvectorInit(GLint row, GLint col, GLfloat arr[]) {
@@ -166,7 +166,7 @@ void CSvectorInit(GLint row, GLint col, GLfloat arr[]) {
 /*
  * converts a CSpoint(PS{0,1,2}[i][j]) to vector (1x3 array)
  */
-void CSpoint2vector(GLfloat** p, GLint row, GLint col) {
+void CSpoint2vector(GLfloat**p, GLint row, GLint col) {
     p[0][0] = PS[0][row][col];
     p[0][1] = PS[1][row][col];
     p[0][2] = PS[2][row][col];
@@ -186,9 +186,9 @@ void matrixDel(GLfloat** M, GLint rows, GLint cols) {
  * Copies a submatrix of an matrix M to another matrix
  */
 void submatrix(GLfloat** M, GLfloat** subM, GLint iStart, GLint jStart, GLint rows, GLint cols) {
-    for (int i = iStart; i < rows + iStart; i++) {
-        for (int j = jStart; j < cols + jStart; j++) {
-            subM[i - iStart][j - jStart] = M[i][j];
+    for (int i = iStart; i < rows+iStart; i++) {
+        for (int j = jStart; j < cols+jStart; j++) {
+            subM[i-iStart][j-jStart] = M[i][j];
         }
     }
 }
@@ -201,14 +201,14 @@ void myinit(void)
 
     U = matrixNew(1, 4);  //1x4 matrix
     V = matrixNew(4, 1);  //4x1 matrix
-
+    
     C1 = matrixNew(4, 3);
     C2 = matrixNew(4, 3);
-
+    
     p = matrixNew(7, 3);
     ep = matrixNew(7, 3);
     subP = matrixNew(4, 3);
-
+    
     M1 = matrixNew(4, 4);
     M1T = matrixNew(4, 4);
     point = matrixNew(1, 3);
@@ -229,8 +229,8 @@ void myinit(void)
     matrixMul(M1T, M1, 4, 4, 4, tempArr);  //Mb-1 x M
     submatrix(tempArr, M1, 0, 0, 4, 4);  //M1 holds transformation matrix from cubic eval points to bezier eval points
 
-/*
-    (Deprecated) for poly curve
+/*  
+    (Deprecated) for poly curve  
     currState.mode = CUBIC_CURVES;
     currState.numOfPoints = 4;
     currState.pointsSet = false;
@@ -238,22 +238,22 @@ void myinit(void)
     currState.showConvex = false;
     currState.lim1 = 0;
     currState.lim2 = -1;
-
+    
     for (int i = 0; i < 4; i++) {
         vectorInit(M1[i], tempM1[i], 4);
         vectorInit(M1T[i], tempM1T[i], 4);
-    }
+    } 
 
     submatrix(p, subP, 0, 0, 4, 3);
     matrixMul(M1, subP, 4, 4, 3, C1);
-
+       
     submatrix(p, subP, 3, 0, 4, 3);
     matrixMul(M1, subP, 4, 4, 3, C2);
-*/
+*/ 
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MAP1_VERTEX_3);
-
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(xViewer, yViewer, zViewer, xref, yref, zref, Vx, Vy, Vz);
@@ -273,10 +273,10 @@ void _bezier(GLfloat** points, GLint order) {
     GLfloat tmpP[100];
     for (int i = 0; i < order; i++) {
         for (int j = 0; j < 3; j++) {
-            tmpP[i * 3 + j] = points[i][j];
+            tmpP[i*3 + j] = points[i][j];
         }
     }
-    // printf("\n");
+   // printf("\n");
 
 
     glMap1f(GL_MAP1_VERTEX_3, 0.0f, 1.0f, 3, order, tmpP);
@@ -290,7 +290,7 @@ void _bezier(GLfloat** points, GLint order) {
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     //for camera
     GLfloat xr = xViewer * cos(theta * ratio) - zViewer * sin(theta * ratio);
     GLfloat zr = xViewer * sin(theta * ratio) + zViewer * cos(theta * ratio);
@@ -310,17 +310,15 @@ void display()
                 _bezier(subP, 4);
                 submatrix(p, subP, 3, 0, 4, 3);  //for 2nd curve
                 _bezier(subP, 4);
-                //            cubicPolynomialCurve(300, C1);
-                //            cubicPolynomialCurve(300, C2);
-            }
-            else if (currState.mode == CUBIC_BEZIER) {
+    //            cubicPolynomialCurve(300, C1);
+    //            cubicPolynomialCurve(300, C2);
+            } else if (currState.mode == CUBIC_BEZIER) {
                 //bezier(7, 6, 200);
                 submatrix(p, subP, 0, 0, 4, 3);  //for 1st curve
                 _bezier(subP, 4);
                 submatrix(p, subP, 3, 0, 4, 3);  //for 2nd curve
                 _bezier(subP, 4);
-            }
-            else {
+            } else {
                 _bezier(p, 7);
             }
         }
@@ -331,7 +329,7 @@ void display()
         GLint numOfPoints = 7 - currState.setPointsLeft;
         glBegin(GL_POINTS);
         for (int i = 0; i < numOfPoints; i++) {
-            //   printf("(%f, %f)\n", ep[i][0], ep[i][1]);
+         //   printf("(%f, %f)\n", ep[i][0], ep[i][1]);
             glVertex3fv(ep[i]);
         }
         glEnd();
@@ -357,8 +355,7 @@ void display()
                 }
             }
         }
-    }
-    else {
+    } else {
         glColor3f(0.3, 0.8, 0.1);
         glPointSize(2.0f);
 
@@ -376,7 +373,7 @@ void display()
             }
         }
     }
-
+    
     //print axes
     glBegin(GL_LINES);
     glVertex3f(0, 0, 0);
@@ -417,7 +414,7 @@ void cubicPolynomialSurface(GLint numOfuPoints, GLint numOfvPoints) {
                 matrixMul(tempVert, V, 1, 4, 1, tempEl);
                 point[coord] = tempEl[0][0];
             }
-            //     printf("%.1f, %.1f, %.1f\n", point[0], point[1], point[2]);
+       //     printf("%.1f, %.1f, %.1f\n", point[0], point[1], point[2]);
             glColor3f(u, v, u);
             glBegin(GL_POINTS);
             glVertex3fv(point);
@@ -429,7 +426,7 @@ void cubicPolynomialSurface(GLint numOfuPoints, GLint numOfvPoints) {
 
 /**
  * (Deprecated)
- * Prints a cubic polynomial curve
+ * Prints a cubic polynomial curve 
  */
 void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
     GLfloat step = 1.0f / numOfPoints;
@@ -446,9 +443,9 @@ void cubicPolynomialCurve(int numOfPoints, GLfloat** C) {
         matrixMul(U, C, 1, 4, 3, point);
         u += step;
 
-        //   printf("(%.1f, %.1f, %.1f)\n", point[0][0], point[0][1], point[0][2]);
+     //   printf("(%.1f, %.1f, %.1f)\n", point[0][0], point[0][1], point[0][2]);
 
-           //glBegin(GL_POINTS);
+        //glBegin(GL_POINTS);
         glVertex3fv(point[0]);
         //glEnd();
     }
@@ -508,19 +505,19 @@ void bezier(GLint order, GLint degree, GLint numOfPoints) {
  */
 void clearMatrices() {
     switch (currState.mode) {
-    case CUBIC_CURVES:
-        matrixDel(p, 4, 3);
-        break;
+        case CUBIC_CURVES:
+            matrixDel(p, 4, 3);
+            break;
 
-    case CUBIC_SURFACE:
-        break;
-
+        case CUBIC_SURFACE:
+            break;
+            
     }
 }
 
 void mouse_callback_func(int button, int state, int x, int y) {
     //mod mouse x,y to match with world coordinates
-    clickX = x;
+    clickX = x;  
     clickY = maxWindowY - y;
 
     if (button == GLUT_LEFT_BUTTON) {
@@ -544,10 +541,9 @@ void mouse_callback_func(int button, int state, int x, int y) {
                     movePoint = true;
                     mvPntInd = minI;
                 }
-            }
-            else if (currState.setPointsLeft) {  //setting points
+            } else if (currState.setPointsLeft) {  //setting points
                 GLint index = 7 - currState.setPointsLeft;
-
+                
                 vectorInit(ep[index], (GLfloat[]) { clickX, clickY, 0 }, 3);
                 currState.setPointsLeft--;
 
@@ -563,7 +559,7 @@ void mouse_callback_func(int button, int state, int x, int y) {
                             for (int j = 0; j < 3; j++) {
                                 p[i][j] = subP[i][j];
                             }
-                            //  printf("(%f, %f)\n", p[i][0], p[i][1]);
+                          //  printf("(%f, %f)\n", p[i][0], p[i][1]);
                         }
 
                         submatrix(ep, C1, 3, 0, 4, 3);
@@ -582,8 +578,7 @@ void mouse_callback_func(int button, int state, int x, int y) {
                         submatrix(ep, subP, 3, 0, 4, 3);
                         matrixMul(M1, subP, 4, 4, 3, C2);
                     } */
-                }
-                else if (currState.mode == BEZIER_ORDER_7 && currState.setPointsLeft == 1) {
+                } else if (currState.mode == BEZIER_ORDER_7 && currState.setPointsLeft == 1) {
                     currState.setPointsLeft = 0;
                     currState.pointsSet = true;
 
@@ -613,22 +608,21 @@ void mouse_motion_callback_func(int x, int y) {
 
             if (currState.mode == CUBIC_BEZIER) {  //we want to shift ep[2] & ep [4] to keep C1 continuity
                 switch (mvPntInd) {
-                case 3:
-                    ep[2][0] += x - clickX;
-                    ep[2][1] += y - clickY;
-                    ep[4][0] += x - clickX;
-                    ep[4][1] += y - clickY;
+                    case 3:
+                        ep[2][0] += x - clickX;
+                        ep[2][1] += y - clickY;
+                        ep[4][0] += x - clickX;
+                        ep[4][1] += y - clickY;
+                        
+                        break;
 
-                    break;
-
-                case 2:
-                case 4:
-                    ep[6 - mvPntInd][0] -= x - clickX;
-                    ep[6 - mvPntInd][1] -= y - clickY;
-                    break;
+                    case 2:
+                    case 4:
+                        ep[6 - mvPntInd][0] -= x - clickX;
+                        ep[6 - mvPntInd][1] -= y - clickY;
+                        break;
                 }
-            }
-            else if (currState.mode == CUBIC_CURVES) {  //have to transpose poly eval points to bezier eval points 
+            } else if (currState.mode == CUBIC_CURVES) {  //have to transpose poly eval points to bezier eval points 
                 submatrix(ep, C1, 0, 0, 4, 3);  //cpy to C1 1st 4 eval points {0,1,2,3}
                 matrixMul(M1, C1, 4, 4, 3, subP);  //poly to bezier eval points transformation
 
@@ -636,7 +630,7 @@ void mouse_motion_callback_func(int x, int y) {
                     for (int j = 0; j < 3; j++) {
                         p[i][j] = subP[i][j];
                     }
-                    //   printf("(%f, %f)\n", p[i][0], p[i][1]);
+                 //   printf("(%f, %f)\n", p[i][0], p[i][1]);
                 }
 
                 submatrix(ep, C1, 3, 0, 4, 3);  //cpy to C1 next 4 eval points {3,4,5,6}
@@ -647,11 +641,11 @@ void mouse_motion_callback_func(int x, int y) {
                         p[i][j] = subP[i - 3][j];
                     }
                 }
-
+                
                 clickX += x - clickX;
                 clickY += y - clickY;
                 glutPostRedisplay();
-
+                
                 return;
             }
 
@@ -663,13 +657,13 @@ void mouse_motion_callback_func(int x, int y) {
             clickX += x - clickX;
             clickY += y - clickY;
 
-            /*  submatrix(ep, subP, 0, 0, 4, 3);
-                matrixMul(M1, subP, 4, 4, 3, C1);
-                submatrix(ep, subP, 3, 0, 4, 3);
-                matrixMul(M1, subP, 4, 4, 3, C2);  */
+        /*  submatrix(ep, subP, 0, 0, 4, 3);
+            matrixMul(M1, subP, 4, 4, 3, C1);
+            submatrix(ep, subP, 3, 0, 4, 3);
+            matrixMul(M1, subP, 4, 4, 3, C2);  */
 
             submatrix(ep, p, 0, 0, 7, 3);
-
+            
             glutPostRedisplay();
         }
     }
@@ -686,28 +680,28 @@ void menu(int id) {
     }
 
     switch (id) {
-        /*  case CUBIC_CURVES:
-              clearMatrices();
+  /*  case CUBIC_CURVES:
+        clearMatrices();
 
-              p = matrixNew(7, 3);
+        p = matrixNew(7, 3);
 
-              currState.mode = CUBIC_CURVES;
-              currState.numOfPoints = 7;
-              currState.setPointsLeft = 7;
-              currState.pointsSet = false;
-              currState.lim1 = 0;
-              currState.lim2 = -1;
+        currState.mode = CUBIC_CURVES;
+        currState.numOfPoints = 7;
+        currState.setPointsLeft = 7;
+        currState.pointsSet = false;
+        currState.lim1 = 0;
+        currState.lim2 = -1;
 
-              for (int i = 0; i < 4; i++) {
-                  vectorInit(M1[i], tempM1[i], 4);
-              }
+        for (int i = 0; i < 4; i++) {
+            vectorInit(M1[i], tempM1[i], 4);
+        }
 
-              submatrix(p, subP, 0, 0, 4, 3);
-              matrixMul(M1, subP, 4, 4, 3, C1);
-              submatrix(p, subP, 3, 0, 4, 3);
-              matrixMul(M1, subP, 4, 4, 3, C2);
+        submatrix(p, subP, 0, 0, 4, 3);
+        matrixMul(M1, subP, 4, 4, 3, C1);
+        submatrix(p, subP, 3, 0, 4, 3);
+        matrixMul(M1, subP, 4, 4, 3, C2);
 
-              break; */
+        break; */
 
     case CUBIC_SURFACE:
         currState.mode = CUBIC_SURFACE;
@@ -722,7 +716,7 @@ void menu(int id) {
         }
         for (int i = 0; i < 4; i++) {
             vectorInit(M1[i], tempM1[i], 4);
-            vectorInit(M1T[i], tempM1T[i], 4);
+            vectorInit(M1T[i],  tempM1T[i], 4);
         }
 
         //points set
@@ -763,12 +757,12 @@ void menu(int id) {
         currState.lim1 = 4;
         currState.lim2 = 7;
         currState.showConvex = false;
-
+        
         p = matrixNew(7, 3);
         for (int i = 0; i < 7; i++) {
             vectorInit(ep[i], tempPoints[i], 3);
             vectorInit(p[i], tempPoints[i], 3);
-        }
+        }    
 
         for (int i = 0; i < 4; i++) {
             vectorInit(M1[i], tempMB[i], 4);
@@ -810,15 +804,14 @@ void menu(int id) {
         }
 
         matrixMul(M1T, M1, 4, 4, 4, tempArr);  //Mb-1 x M
-        submatrix(tempArr, M1, 0, 0, 4, 4);
+        submatrix(tempArr, M1, 0, 0, 4, 4);        
 
         break;
 
     case SHOW_CONVEX:
         if (currState.mode == CUBIC_BEZIER || currState.mode == BEZIER_ORDER_7) {
             currState.showConvex = !currState.showConvex;
-        }
-        else {
+        } else {
             return;
         }
         break;
@@ -838,17 +831,13 @@ void menu(int id) {
 void keyboard_callback_func(unsigned char key, int x, int y) {
     if (key == 'w') {
         yViewer += 10;
-    }
-    else if (key == 'd') {
+    } else if (key == 'd') {
         theta -= 10;
-    }
-    else if (key == 'a') {
+    } else if (key == 'a') {
         theta += 10;
-    }
-    else if (key == 's') {
+    } else if (key == 's') {
         yViewer -= 10;
-    }
-    else if (key == 'r') {
+    } else if (key == 'r') {
         theta = 0;
         yViewer = 0;
     }
@@ -883,6 +872,6 @@ int main(int argc, char** argv)
 
     myinit();
     glutMainLoop();
-
+    
     return 0;
 }
