@@ -23,7 +23,7 @@ heightLoop:
 	;calc out_gray next row memory position
 	mov eax, edi
 	;mul [NextRowStep]	; j * NextRowStep
-	shl eax, 13			; j * 8192
+	shl eax, 2			; j * 4
 	mov ebx, [ebp+20]
 	add ebx, eax		; ebx points to next row of 'output_grey'
 
@@ -36,7 +36,7 @@ widthLoop:
 	je afterWidthLoop
 
 	; loop code
-	mov eax, [RedFactor]
+	mov eax, [BlueFactor]
 	movzx edx, byte ptr [ecx]
 	mul edx						; input_color[x][y].rgbRed * 2989
 	inc ecx						; ecx points to input_color[x][y].rgbGreen
@@ -48,16 +48,13 @@ widthLoop:
 	inc ecx						; ecx points to input_color[x][y].rgbBlue
 	add [ebx], eax		
 
-	mov eax, [BlueFactor]
+	mov eax, [RedFactor]
 	movzx edx, byte ptr [ecx]
 	mul edx						; input_color[x][y].rgbRed * 2989
 	inc ecx						; ecx points to input_color[x][y].rgbReserved
 	add [ebx], eax		
 	
 	; div 10000 for proper range [0-255]
-	cmp dword ptr [ebx], 0
-	jz afterDivision
-
 	push ebx
 	; division
 	mov eax, [ebx]
@@ -68,8 +65,9 @@ widthLoop:
 	mov [ebx], eax
 afterDivision:
 	
-	add ebx, 4					; next 'output_grey' array element
+	add ebx, 8192				; next 'output_grey' array element
 	inc ecx						; next 'input_color' array element
+	add ecx, 8188
 
 	; EOF loop code
 

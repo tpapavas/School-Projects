@@ -19,7 +19,7 @@
 #include <math.h>
 #include <string.h>
 
-#define THRESHOLD 60   // input threshold for sobel 
+#define THRESHOLD 90   // input threshold for sobel 
 
 // bmp file header 
 typedef struct tagBitmapFileHeader {
@@ -139,14 +139,21 @@ int main()
 	memset(gray_image, 0, width * height * sizeof(int));    // not really neccesary
 
 	// coverting the input RGB bmp to grayscale image (not black and white)
-	bmptogray_conversion(height, width, image, gray_image);
-	bmptogray_conversion1(height, width, image, gray_image1);
+	//bmptogray_conversion(height, width, image, gray_image);
+	bmptogray_conversion1(height, width, image, gray_image);
 
-	for (y = 0; y < height; y++) {
-		for (x = 0; x < width; x++) {
-			printf("%d\n", gray_image[x][y] - gray_image1[x][y]);
-		}
-	}
+	//int diff;
+	//for (y = 0; y < height; y++) {
+	//	for (x = 0; x < width; x++) {
+	//		diff = gray_image[x][y] - gray_image1[x][y];
+	//		if (diff > 0) {
+	//			printf("%d, %d, %d\n", image[x][y].rgbRed, image[x][y].rgbGreen, image[x][y].rgbBlue);
+	//			printf("(%d, %d)\n", x, y/*gray_image[x][y], gray_image1[x][y]*/); 
+	//			printf("%d, %d\n", gray_image[x][y], gray_image1[x][y]);
+	//			system("pause");
+	//		}
+	//	}
+	//}
 
 	// Edge Detection with Sobel  
 	sobel_detection(height, width, gray_image, ee_image);
