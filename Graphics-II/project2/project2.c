@@ -54,7 +54,11 @@ typedef struct treenode {
 } treenode;
 
 
+GLfloat theta1[10] = { 0.0f };
 
+treenode torso_node, head_node, neck_node;
+
+void torso() {}
 
 void myinit(void)
 {
@@ -62,8 +66,21 @@ void myinit(void)
     glEnable(GL_MAP1_VERTEX_3);
 
     glMatrixMode(GL_MODELVIEW);
+
+    //setup treenodes for dog    
+    //torso
     glLoadIdentity();
+    glRotatef(theta1[0], 0.0, 1.0, 0.0);
+    glGetFloatv(GL_MODELVIEW_MATRIX, torso_node.m);
+    torso_node.f = torso;
+    torso_node.sibling = NULL;
+    torso_node.child = &neck_node;
+
+
+/*  glLoadIdentity();
     gluLookAt(xViewer, yViewer, zViewer, xref, yref, zref, Vx, Vy, Vz);
+
+    */
 
     glClearColor(1.0, 1.0, 1.0, 0.0);
 

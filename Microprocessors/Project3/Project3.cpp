@@ -2,11 +2,11 @@
 ============================================================================
 = Sobel.c implements the Edge Detection with Sobel Algorithm               =
 = ------------------------------------------------------------------------ =
-= Inputs (both inputs are hardwired in the source code):                                                                  =
+= Inputs (both inputs are hardwired in the source code):                   =
 =   - Image: file bmp image                                                =
 =   - Desired Threshold: T, integer from 0 to 255                          =
 = Output:                                                                  =
-=   - Image with Edges Detected: "Output_Sobel_<T>.bmp"                           =
+=   - Image with Edges Detected: "Output_Sobel_<T>.bmp"                    =
 = Run:                                                                     =
 =  copy-paste the input image.bmp to _project_name_/_project_name_ folder  =
 =  same folder where the .cpp file is located                              =
@@ -19,7 +19,7 @@
 #include <math.h>
 #include <string.h>
 
-#define THRESHOLD 90   // input threshold for sobel 
+#define THRESHOLD 60   // input threshold for sobel 
 
 // bmp file header 
 typedef struct tagBitmapFileHeader {
@@ -59,11 +59,16 @@ typedef struct {                      /**** Colormap entry structure ****/
 RGBQUAD image[2048][2048];          // Image as input  - just use a big table to store the colors
 unsigned char ee_image[2048][2048]; // To store the annotations (output) of the edge detection 
 int gray_image[2048][2048];         // To hold the Grayscale image
+int gray_image1[2048][2048];         // To hold the Grayscale image
 
 // the following function must be implemented in assembly
 int bmptogray_conversion(int, int, RGBQUAD input_color[2048][2048], int output_gray[2048][2048]);   // first function to be implemented in assembly 
 int sobel_detection(int, int, int input_gray_image[2048][2048], unsigned char output_ee_image[2048][2048]); // second function to be implemented in assembly 
 int border_pixel_calculation(int, int, unsigned char ee_image[2048][2048]);  // third  function to be implemented in assembly 
+
+// assembly functions //
+extern "C" int bmptogray_conversion1(int, int, RGBQUAD input_color[2048][2048], int output_gray[2048][2048]);
+
 
 int main()
 {
@@ -135,6 +140,13 @@ int main()
 
 	// coverting the input RGB bmp to grayscale image (not black and white)
 	bmptogray_conversion(height, width, image, gray_image);
+	bmptogray_conversion1(height, width, image, gray_image1);
+
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			printf("%d\n", gray_image[x][y] - gray_image1[x][y]);
+		}
+	}
 
 	// Edge Detection with Sobel  
 	sobel_detection(height, width, gray_image, ee_image);
