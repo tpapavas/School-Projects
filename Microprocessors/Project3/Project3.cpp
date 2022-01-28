@@ -19,7 +19,8 @@
 #include <math.h>
 #include <string.h>
 
-#define THRESHOLD 90   // input threshold for sobel 
+#define THRESHOLD 45   // input threshold for sobel 
+int KK = 12;
 
 // bmp file header 
 typedef struct tagBitmapFileHeader {
@@ -66,8 +67,14 @@ int bmptogray_conversion(int, int, RGBQUAD input_color[2048][2048], int output_g
 int sobel_detection(int, int, int input_gray_image[2048][2048], unsigned char output_ee_image[2048][2048]); // second function to be implemented in assembly 
 int border_pixel_calculation(int, int, unsigned char ee_image[2048][2048]);  // third  function to be implemented in assembly 
 
+
+double ee[2048][2048];
+double ee1[2048][2048];
+
 // assembly functions //
 extern "C" int bmptogray_conversion1(int, int, RGBQUAD input_color[2048][2048], int output_gray[2048][2048]);
+//extern "C" int sobel_detection1(int, int, int input_gray_image[2048][2048], unsigned char output_ee_image[2048][2048], double ee1[2048][2048]);
+extern "C" int sobel_detection1(int, int, int input_gray_image[2048][2048], unsigned char output_ee_image[2048][2048], int);
 
 
 int main()
@@ -156,7 +163,15 @@ int main()
 	//}
 
 	// Edge Detection with Sobel  
-	sobel_detection(height, width, gray_image, ee_image);
+	//sobel_detection(height, width, gray_image, ee_image);
+	//sobel_detection1(height, width, gray_image, ee_image, ee1);
+	sobel_detection1(height, width, gray_image, ee_image, THRESHOLD);
+
+	/*for (int x = 1; x < width - 1; x++) {
+		for (int y = 1; y < height - 1; y++) {
+			printf("%.2lf\n", ee1[x][y]-ee[x][y]);
+		}
+	}*/
 
 	// Calculating the border pixels with replication
 	border_pixel_calculation(height, width, ee_image);
@@ -238,6 +253,8 @@ int sobel_detection(int height, int width, int input_gray_image[2048][2048], uns
 			// Thresholding -- just write black and white
 			if (e <= THRESHOLD) ee_image[x][y] = 0;
 			if (e > THRESHOLD)  ee_image[x][y] = 255;
+
+			ee[x][y] = e;
 		} // End of image scanning
 
 	return 0;
