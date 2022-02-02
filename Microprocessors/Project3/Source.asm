@@ -17,6 +17,10 @@ temp real8 ?
 bmptogray_conversion1 PROC
 	push ebp
 	mov ebp, esp		; save stack pointer for realtive call to arguments and local vars
+	push esi
+	push edi
+	pushfd
+
 
 	;mov ebx, [ebp+20]	; ebx points to 'output_gray'
 
@@ -84,6 +88,10 @@ afterWidthLoop:
 afterHeightLoop:
 
 	xor eax, eax		; return 0
+
+	popfd				; restore eflag
+	pop edi
+	pop esi
 	pop ebp
 	
 	ret
@@ -93,6 +101,9 @@ bmptogray_conversion1 endp
 sobel_detection1 proc
 	push ebp
 	mov ebp, esp
+	push esi
+	push edi
+	pushfd
 
 	;;testing
 	;mov eax, [ebp+24]
@@ -288,8 +299,9 @@ afterWidthLoop:
 
 	xor eax, eax		; return 0
 
-
-
+	popfd
+	pop edi
+	pop esi
 	pop ebp
 
 	ret
