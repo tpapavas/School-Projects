@@ -1,2 +1,4 @@
 ﻿  Assembling Source.asm...
+cl : command line warning D9002: ignoring unknown option '-mmmx'
+  Project3.cpp
   Project3.vcxproj -> C:\Users\Θοδωρής\Αρχεία\cs\School-Projects\Microprocessors\Project3\Debug\Project3.exe

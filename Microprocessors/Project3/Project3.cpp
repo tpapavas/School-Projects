@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <math.h>
 #include <string.h>
+#include <xmmintrin.h>
 
 #define THRESHOLD 45   // input threshold for sobel 
 int KK = 12;
@@ -75,10 +76,12 @@ double ee1[2048][2048];
 extern "C" int bmptogray_conversion1(int, int, RGBQUAD input_color[2048][2048], int output_gray[2048][2048]);
 //extern "C" int sobel_detection1(int, int, int input_gray_image[2048][2048], unsigned char output_ee_image[2048][2048], double ee1[2048][2048]);
 extern "C" int sobel_detection1(int, int, int input_gray_image[2048][2048], unsigned char output_ee_image[2048][2048], int);
-
+extern "C" int border_pixel_calculation1(int, int, unsigned char ee_image[2048][2048]);  // third  function to be implemented in assembly 
 
 int main()
 {
+	
+
 	FILE* fp;
 	FILE* wp;
 	unsigned int width, height;
@@ -104,6 +107,7 @@ int main()
 		printf("error when reading the file");
 		return 0;
 	}
+
 
 	printf("file opened \n");
 	// Reading the file header and any following bitmap information...
@@ -174,7 +178,8 @@ int main()
 	}*/
 
 	// Calculating the border pixels with replication
-	border_pixel_calculation(height, width, ee_image);
+	//border_pixel_calculation(height, width, ee_image);
+	border_pixel_calculation1(height, width, ee_image);
 
 	printf("The edges of the image have been detected with Sobel and a Threshold: %d\n", THRESHOLD);
 
