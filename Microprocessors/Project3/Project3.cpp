@@ -214,6 +214,7 @@ int main()
 	return 0;
 }
 
+/*
 // first function to be implemented in assembly
 // coverting the input RGB bmp to grayscale image (not black and white)
 int bmptogray_conversion(int height, int width, RGBQUAD input_color[2048][2048], int output_gray[2048][2048])
@@ -283,3 +284,4 @@ int border_pixel_calculation(int height, int width, unsigned char ee_image[2048]
 
 	return 0;
 }
+*/
