@@ -400,50 +400,39 @@ void bendNeckAndHead() {
 }
 
 void walk() {
-    GLint frame = motionFrames % 25;
-    
-    if (frame < 6) {
-        theta1[1][0] -= 7 * dir;
-        theta1[1][1] += 7 * dir;
-        theta1[1][2] -= 7 * dir;
-    } else if (frame < 12 && frame < 18) {
-        theta1[1][0] -= 7 * dir;
-        theta1[1][1] += 7 * dir;
-        theta1[1][2] -= 7 * dir;
+    GLfloat factor = (cos(  -motionFrames / 7.0)       ) / 3;
+    GLfloat factor2 = (cos((-motionFrames / 7.0)-  1)) / 3;
+    GLfloat factor3 = (cos((-motionFrames / 7.0) - 1.5)  ) / 3;
+    GLfloat factor4 = (cos((-motionFrames / 7.0) - 0.5)) / 3;
 
-        theta1[4][0] -= 7 * (-dir);
-        theta1[4][1] += 7 * (-dir);
-        theta1[4][2] -= 7 * (-dir);
-    } if (frame < 18) {
-        theta1[4][0] -= 7 * (-dir);
-        theta1[4][1] += 7 * (-dir);
-        theta1[4][2] -= 7 * (-dir);
 
-        theta1[2][0] -= 7 * dir;
-        theta1[2][1] += 7 * dir;
-        theta1[2][2] -= 7 * dir;
-    } 
-    if (frame < 24) {
-        theta1[2][0] -= 7 * dir;
-        theta1[2][1] += 7 * dir;
-        theta1[2][2] -= 7 * dir;
+    theta1[1][0] -= 5 * dir * factor;
+    theta1[1][1] += 5 * dir * factor;
+    theta1[1][2] -= 5 * dir * factor;
 
-        theta1[3][0] -= 7 * dir;
-        theta1[3][1] += 7 * dir;
-        theta1[3][2] -= 7 * dir;
+    theta1[2][0] -= 5 * dir * factor2;
+    theta1[2][1] += 5 * dir * factor2;
+    theta1[2][2] -= 5 * dir * factor2;
+
+    theta1[3][0] -= 5 * dir * factor3;
+    theta1[3][1] += 5 * dir * factor3;
+    theta1[3][2] -= 5 * dir * factor3;
+
+    theta1[4][0] -= 5 * dir * factor4;
+    theta1[4][1] += 5 * dir * factor4;
+    theta1[4][2] -= 5 * dir * factor4;
+
+    dTorso[0] += 0.5;
+    if ((motionFrames % 20) < 10) {
+        dTorso[1] += 0.6;
     }
     else {
-        theta1[3][0] -= 7 * dir;
-        theta1[3][1] += 7 * dir;
-        theta1[3][2] -= 7 * dir;
+        dTorso[1] -= 0.6;
     }
 
-    dTorso[0] += 0.4;
-    dTorso[1] += 1.4 * dir;
-    
-    if (!(motionFrames % 5)) {
+    /*if (motionFrames % 25 == 0) {
         dir = -dir;
-    }
+    }*/
 }
 
 void myinit(void)
