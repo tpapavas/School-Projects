@@ -8,9 +8,8 @@
 
 #include <math.h>
 
-GLfloat Dy = 10.0f;
-
 #define MAX_DISTANCE 15.0f
+#define MAX_PARTICLES 1024
 
 //for view (gluLookAt)
 GLfloat xViewer = 0.0f, yViewer = 0.0f, zViewer = 70.0f;
@@ -29,13 +28,6 @@ typedef enum {
     EXIT
 } Mode;
 
-
-bool leftMouseClicked;
-bool movePoint;  //a point is currently moving
-GLint mvPntInd;  //index of point that has been moved
-GLint clickX;
-GLint clickY;
-
 bool showBox = false;
 
 typedef struct particle {
@@ -51,7 +43,6 @@ particle particles[1024];
 GLint numOfParticles = 0;
 GLint createParticle = 0;
 
-const GLint MAX_PARTICLES = 1024;
 
 void newParticle(GLint i) {
     particles[i].p[0] = 0.0;
@@ -120,7 +111,7 @@ void moveParticles() {
         particles[i].p[1] += h * particles[i].v[1];
         particles[i].p[2] += h * particles[i].v[2];
 
-        particles[i].v[0] += w[0]; // g[0] / particles[i].m;
+        particles[i].v[0] += h * w[0] / particles[i].m; // g[0] / particles[i].m;
         particles[i].v[1] += h * g[1] / particles[i].m;
         particles[i].v[2] += 0; // g[2] / particles[i].m;
 
@@ -134,7 +125,7 @@ void moveParticles() {
 }
 
 void box() {
-    glColor4f(0.5, 0.7, 0.5, 0.4);
+    glColor4f(0.4, 0.6, 0.4, 0.4);
 
     //upper
     glBegin(GL_TRIANGLE_STRIP);
@@ -221,43 +212,12 @@ void display()
     createParticle++;
 }
 
-
-void mouse_callback_func(int button, int state, int x, int y) {
-    //mod mouse x,y to match with world coordinates
-    clickX = x;
-    clickY = maxWindowY - y;
-
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            leftMouseClicked = true;
-        }
-        else if (state == GLUT_UP && leftMouseClicked) {
-            leftMouseClicked = false;
-            movePoint = false;
-        }
-    }
-}
-
-void mouse_motion_callback_func(int x, int y) {
-    if (leftMouseClicked) {
-
-        y = maxWindowY - y;
-
-        printf("(%d, %d)\n", x, y);
-
-        clickX += x - clickX;
-        clickY += y - clickY;
-
-        glutPostRedisplay();
-    }
-}
-
 void menu(int id) {
 
     switch (id) {
  
     case WIND:
-        w[0] = fabs(w[0] - 0.004);
+        w[0] = fabs(w[0] - 0.3);
 
         break;
 
@@ -309,17 +269,9 @@ int main(int argc, char** argv)
     windowId = glutCreateWindow("project1");
     glutDisplayFunc(display);
 
-    glutMouseFunc(mouse_callback_func);
-    glutMotionFunc(mouse_motion_callback_func);
-
     GLint bezierMenu = glutCreateMenu(menu);
-    glutAddMenuEntry("• Wind (On/Off)", WIND);
+    glutAddMenuEntry("• Wind On/Off", WIND);
     glutAddMenuEntry("• Show/Hide box", SHOW_BOX);
-    //glutAddMenuEntry("• Go back to normal", BACK_TO_NORMAL);
-    /* glutCreateMenu(menu);
-     glutAddMenuEntry("• Cubic Curves", CUBIC_CURVES);
-     glutAddSubMenu("- Bezier", bezierMenu);
-     glutAddMenuEntry("• Cubic Surface", CUBIC_SURFACE);*/
     glutAddMenuEntry("Exit", EXIT);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
