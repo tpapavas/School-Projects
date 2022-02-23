@@ -38,6 +38,7 @@ GLint dir = 1;
 GLint motionFrames = 0;
 GLfloat dTorso[3] = { 0.0f,0.0,0.0 };
 Mode modeQueue[10];
+GLint framesQueue[10];
 GLint queueHead = 0;
 
 typedef struct treenode {
@@ -187,19 +188,19 @@ void brf() {
 
 ////BACK LEFT LEG////
 void blu() {
-    glColor3f(0.5, 0.8, 0.1);
+    glColor3f(0.3, 0.6, 0.1);
 
     GLUquadric* q = gluNewQuadric();
     gluCylinder(q, BACK_LEFT_UPPER_RADIUS, BACK_LEFT_UPPER_RADIUS, BACK_LEFT_UPPER_HEIGHT, 200, 200);
 }
 void bll() {
-    glColor3f(0.8, 0.5, 0.4);
+    glColor3f(0.6, 0.5, 0.3);
 
     GLUquadric* q = gluNewQuadric();
     gluCylinder(q, BACK_LEFT_LOWER_RADIUS, BACK_LEFT_LOWER_RADIUS, BACK_LEFT_LOWER_HEIGHT, 200, 200);
 }
 void blf() {
-    glColor3f(0.1, 0.7, 0.7);
+    glColor3f(0.1, 0.5, 0.6);
 
     GLUquadric* q = gluNewQuadric();
     gluCylinder(q, BACK_LEFT_FOOT_RADIUS, BACK_LEFT_FOOT_RADIUS, BACK_LEFT_FOOT_HEIGHT, 200, 200);
@@ -395,14 +396,14 @@ void walk() {
     theta1[4][1] += 5 * dir * factor4;
     theta1[4][2] -= 5 * dir * factor4;
 
-    dTorso[0] += 0.5;
+    dTorso[0] += 0.5 * dir;
     if ((motionFrames % 20) < 10) {
-        dTorso[1] += 0.6;
-        theta1[0][0] -= 0.4;
+        dTorso[1] += 0.6 * dir;
+        theta1[0][0] -= 0.4 * dir;
     }
     else {
-        dTorso[1] -= 0.6;
-        theta1[0][0] += 0.4;
+        dTorso[1] -= 0.6 * dir;
+        theta1[0][0] += 0.4 * dir;
     }
 
     /*if (motionFrames % 25 == 0) {
@@ -592,6 +593,7 @@ void menu(int id) {
         dir = 1;
         if (queueHead < 10) {
             modeQueue[queueHead] = id;
+            framesQueue[queueHead] = motionFrames;
             queueHead++;
         } else {
             keepMoving = false;
@@ -606,6 +608,7 @@ void menu(int id) {
         dir = 1;
         if (queueHead < 10) {
             modeQueue[queueHead] = id;
+            framesQueue[queueHead] = motionFrames;
             queueHead++;
         } else {
             keepMoving = false;
@@ -620,6 +623,7 @@ void menu(int id) {
         dir = 1;
         if (queueHead < 10) {
             modeQueue[queueHead] = id;
+            framesQueue[queueHead] = motionFrames;
             queueHead++;
         } else {
             keepMoving = false;
@@ -634,6 +638,7 @@ void menu(int id) {
         dir = 1;
         if (queueHead < 10) {
             modeQueue[queueHead] = id;
+            framesQueue[queueHead] = motionFrames;
             queueHead++;
         } else {
             keepMoving = false;
@@ -647,6 +652,7 @@ void menu(int id) {
         motionFrames = 10;
         if (queueHead > 0) {
             motionMode = modeQueue[queueHead-1];
+            motionFrames = framesQueue[queueHead-1];
             queueHead--;
         } else {
             keepMoving = false;
