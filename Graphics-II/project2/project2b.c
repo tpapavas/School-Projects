@@ -25,6 +25,7 @@ GLint maxWindowY = 480;
 typedef enum {
     SHOW_BOX,
     WIND,
+    UNBOUNDED,
     EXIT
 } Mode;
 
@@ -42,7 +43,7 @@ GLfloat w[3] = { 0.0, 0.0, 0.0 };  //wind
 particle particles[1024];
 GLint numOfParticles = 0;
 GLint createParticle = 0;
-
+GLfloat bound = 200.0;
 
 void newParticle(GLint i) {
     particles[i].p[0] = 0.0;
@@ -60,7 +61,7 @@ void newParticle(GLint i) {
 
 bool outOfBounds(GLfloat p[3]) {
     for (int i = 0; i < 3; i++)
-        if (p[i] > 200 || p[i] < -200)
+        if (p[i] > bound || p[i] < -bound)
             return true;
     return false;
 }
@@ -91,9 +92,6 @@ void collisionDetection(GLfloat p[3], GLfloat prevPosition[3] ,GLfloat prevVeloc
         prevPosition[0] = p[0] - t * (p[0] - prevPosition[0]);
         prevPosition[1] = 0;
         prevPosition[2] = p[2] - t * (p[2] - prevPosition[2]);
-
-
-        /*printf("[%.1f %.1f %.1f]\n", prevVelocity[0], prevVelocity[1], prevVelocity[2]);*/
     }
 }
 
@@ -121,11 +119,10 @@ void moveParticles() {
             glEnd();
         }
     }
-    /*printf("[%.1f %.1f %.1f]\n", particles[1].v[0], particles[1].v[1], particles[1].v[2]);*/
 }
 
 void box() {
-    glColor4f(0.4, 0.6, 0.4, 0.4);
+    glColor4f(0.1, 0.3, 0.2, 0.5);
 
     //upper
     glBegin(GL_TRIANGLE_STRIP);
@@ -188,7 +185,7 @@ void display()
     glTranslatef(280, 120, -250);
     //glScalef(2, 2, 2);
 
-    glColor3f(0.4, 0.6, 0.4);
+    glColor3f(0.3, 0.6, 0.3);
     glBegin(GL_POLYGON);
     glVertex3f(-200, 0.0, -200);
     glVertex3f(200, 0.0, -200);
@@ -197,7 +194,7 @@ void display()
     glEnd();
 
     glColor3f(1.0, 1.0, 1.0);
-    if (!(createParticle % 6)) {
+    if (!(createParticle % 7)) {
         newParticle(numOfParticles);
         createParticle = 0;
     }
@@ -217,12 +214,18 @@ void menu(int id) {
     switch (id) {
  
     case WIND:
-        w[0] = fabs(w[0] - 0.3);
+        w[0] = fabs(w[0] - 0.2);
 
         break;
 
     case SHOW_BOX:
         showBox = !showBox;
+
+        break;
+
+    case UNBOUNDED:
+        bound = fabs(bound - 1000.0);
+        showBox = false;
 
         break;
 
@@ -272,6 +275,7 @@ int main(int argc, char** argv)
     GLint bezierMenu = glutCreateMenu(menu);
     glutAddMenuEntry("• Wind On/Off", WIND);
     glutAddMenuEntry("• Show/Hide box", SHOW_BOX);
+    glutAddMenuEntry("• Unbound On/Off", UNBOUNDED);
     glutAddMenuEntry("Exit", EXIT);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
