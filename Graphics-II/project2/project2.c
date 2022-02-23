@@ -7,8 +7,6 @@
 
 #include <math.h>
 
-GLfloat Dy = 10.0f;
-
 #define MAX_DISTANCE 15.0f
 
 //for view (gluLookAt)
@@ -30,31 +28,17 @@ typedef enum {
     WALK,
     STARTING_POSITION,
     NOT_MOVING,
+    REAR_VIEW,
     EXIT
 } Mode;
-
-//state of the program
-struct State {
-    bool pointsSet;
-    GLint setPointsLeft;
-    Mode mode;
-    GLint numOfPoints;
-    bool showConvex;
-    GLint lim1;     //for convex hull (bezier only)
-    GLint lim2;     //for convex hull (bezier only)
-} currState;
-
-bool leftMouseClicked;
-bool movePoint;  //a point is currently moving
-GLint mvPntInd;  //index of point that has been moved
-GLint clickX;
-GLint clickY;
 
 Mode motionMode = NOT_MOVING;
 bool keepMoving = false;
 GLint dir = 1;
 GLint motionFrames = 0;
 GLfloat dTorso[3] = { 0.0f,0.0,0.0 };
+Mode modeQueue[10];
+GLint queueHead = 0;
 
 typedef struct treenode {
     GLfloat m[16];
@@ -237,26 +221,6 @@ void traverse(treenode* root) {
     if (root->sibling != NULL) {
         traverse(root->sibling);
     }
-}
-
-void moveBullet() {
-    glColor3f(0, 0, 0);
-
-    GLfloat DDx = TORSO_HEIGHT - FRONT_RIGHT_UPPER_RADIUS;
-    GLfloat DDy = FRONT_RIGHT_UPPER_HEIGHT + FRONT_RIGHT_LOWER_HEIGHT;
-    GLfloat DDz = TORSO_RADIUS;
-
-    glBegin(GL_LINES);
-    glVertex3f(DDx, -(DDy + Dy), DDz);
-    glVertex3f(DDx, -(DDy + Dy + 30), DDz);
-    glEnd();
-
-    Dy += 80.0f;
-    if (Dy > 500) {
-        Dy = 10;
-    }
-  
-    glutPostRedisplay();
 }
 
 void drawDog() {
@@ -455,57 +419,32 @@ void myinit(void)
 
     //setup treenodes for dog    
     //torso
-    glLoadIdentity();
-    //glTranslatef();
-    glRotatef(theta1[0][0], 0.0f, 0.0f, 1.0f);
-    glRotatef(90.0, 0.0f, 1.0f, 0.0f);
-    glGetFloatv(GL_MODELVIEW_MATRIX, torso_node.m);
     torso_node.f = torso;
     torso_node.sibling = NULL;
     torso_node.child = &neck_node;
 
     //neck
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, (TORSO_HEIGHT));
-    glRotatef(theta1[0][1] - 30, 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, neck_node.m);
     neck_node.f = neck;
     neck_node.sibling = &fru_node;
     neck_node.child = &head_node;
 
     //head
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, NECK_HEIGHT + HEAD_RADIUS/2);
-    glRotatef(theta1[0][2], 0.0, 0.0, 1.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, head_node.m);
     head_node.f = head;
     head_node.sibling = NULL;
     head_node.child = NULL;
 
     ////FRONT RIGHT LEG////
     //front right upper
-    glLoadIdentity();
-    glTranslatef(-TORSO_RADIUS, -TORSO_RADIUS, TORSO_HEIGHT-FRONT_RIGHT_UPPER_RADIUS);
-    glRotatef(theta1[1][0], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, fru_node.m);
     fru_node.f = fru;
     fru_node.sibling = &flu_node;  //pending//
     fru_node.child = &frl_node;
 
     //front right lower
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, FRONT_RIGHT_UPPER_HEIGHT);
-    glRotatef(theta1[1][1], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, frl_node.m);
     frl_node.f = frl;
     frl_node.sibling = NULL;
     frl_node.child = &frf_node; 
 
     //front right foot
-    glLoadIdentity();
-    glTranslatef(0.0, -FRONT_RIGHT_LOWER_RADIUS, FRONT_RIGHT_LOWER_HEIGHT+FRONT_RIGHT_FOOT_RADIUS);
-    glRotatef(-theta1[1][2], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, frf_node.m);
     frf_node.f = frf;
     frf_node.sibling = NULL;
     frf_node.child = NULL;  //pending
@@ -513,28 +452,16 @@ void myinit(void)
 
     ////FRONT LEFT LEG////
     //front left upper
-    glLoadIdentity();
-    glTranslatef(TORSO_RADIUS, -TORSO_RADIUS, TORSO_HEIGHT - FRONT_LEFT_UPPER_RADIUS);
-    glRotatef(theta1[2][0], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, flu_node.m);
     flu_node.f = flu;
     flu_node.sibling = &bru_node;  //pending//
     flu_node.child = &fll_node;
 
     //front left lower
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, FRONT_LEFT_UPPER_HEIGHT);
-    glRotatef(theta1[2][1], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, fll_node.m);
     fll_node.f = fll;
     fll_node.sibling = NULL;
     fll_node.child = &flf_node;
 
     //front left foot
-    glLoadIdentity();
-    glTranslatef(0.0, -FRONT_LEFT_LOWER_RADIUS, FRONT_LEFT_LOWER_HEIGHT + FRONT_LEFT_FOOT_RADIUS);
-    glRotatef(-theta1[2][2], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, flf_node.m);
     flf_node.f = flf;
     flf_node.sibling = NULL;
     flf_node.child = NULL;
@@ -542,28 +469,16 @@ void myinit(void)
 
     ////BACK RIGHT LEG////
     //back right upper
-    glLoadIdentity();
-    glTranslatef(-TORSO_RADIUS, -TORSO_RADIUS, BACK_RIGHT_UPPER_RADIUS);
-    glRotatef(theta1[3][0], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, bru_node.m);
     bru_node.f = bru;
     bru_node.sibling = &blu_node;  //pending//
     bru_node.child = &brl_node;
 
     //back right lower
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, BACK_RIGHT_UPPER_HEIGHT);
-    glRotatef(theta1[3][1], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, brl_node.m);
     brl_node.f = brl;
     brl_node.sibling = NULL;
     brl_node.child = &brf_node;
 
     //back right foot
-    glLoadIdentity();
-    glTranslatef(0.0, -BACK_RIGHT_LOWER_RADIUS, BACK_RIGHT_LOWER_HEIGHT + BACK_RIGHT_FOOT_RADIUS);
-    glRotatef(-theta1[3][2], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, brf_node.m);
     brf_node.f = brf;
     brf_node.sibling = NULL;
     brf_node.child = NULL;  //pending
@@ -571,35 +486,19 @@ void myinit(void)
 
     ////BACK LEFT LEG////
     //back left upper
-    glLoadIdentity();
-    glTranslatef(TORSO_RADIUS, -TORSO_RADIUS, BACK_LEFT_UPPER_RADIUS);
-    glRotatef(theta1[4][0], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, blu_node.m);
     blu_node.f = blu;
     blu_node.sibling = NULL;
     blu_node.child = &bll_node;
 
     //back left lower
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, BACK_LEFT_UPPER_HEIGHT);
-    glRotatef(theta1[4][1], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, bll_node.m);
     bll_node.f = bll;
     bll_node.sibling = NULL;
     bll_node.child = &blf_node;
 
     //front left foot
-    glLoadIdentity();
-    glTranslatef(0.0, -BACK_LEFT_LOWER_RADIUS, BACK_LEFT_LOWER_HEIGHT + BACK_LEFT_FOOT_RADIUS);
-    glRotatef(-theta1[4][2], 1.0, 0.0, 0.0);
-    glGetFloatv(GL_MODELVIEW_MATRIX, blf_node.m);
     blf_node.f = blf;
     blf_node.sibling = NULL;
     blf_node.child = NULL;
-
-
-
-
 
 
 /*  glLoadIdentity();
@@ -671,7 +570,6 @@ void display()
     glPopMatrix();
 
     traverse(&torso_node);
-    //moveBullet();
     
     glutSwapBuffers();
 
@@ -684,9 +582,6 @@ void display()
     }
 }
 
-
-
-
 void menu(int id) {
 
     switch (id) {
@@ -695,6 +590,12 @@ void menu(int id) {
         keepMoving = true;
         motionFrames = 10;
         dir = 1;
+        if (queueHead < 10) {
+            modeQueue[queueHead] = id;
+            queueHead++;
+        } else {
+            keepMoving = false;
+        }
 
         break;
 
@@ -703,6 +604,12 @@ void menu(int id) {
         keepMoving = true;
         motionFrames = 10;
         dir = 1;
+        if (queueHead < 10) {
+            modeQueue[queueHead] = id;
+            queueHead++;
+        } else {
+            keepMoving = false;
+        }
         
         break;
 
@@ -711,6 +618,12 @@ void menu(int id) {
         keepMoving = true;
         motionFrames = 10;
         dir = 1;
+        if (queueHead < 10) {
+            modeQueue[queueHead] = id;
+            queueHead++;
+        } else {
+            keepMoving = false;
+        }
 
         break;
 
@@ -719,13 +632,25 @@ void menu(int id) {
         keepMoving = true;
         motionFrames = 399;
         dir = 1;
+        if (queueHead < 10) {
+            modeQueue[queueHead] = id;
+            queueHead++;
+        } else {
+            keepMoving = false;
+        }
 
         break;
 
     case GO_BACK:
-        dir = -dir;
+        dir = -1;
         keepMoving = true;
         motionFrames = 10;
+        if (queueHead > 0) {
+            motionMode = modeQueue[queueHead-1];
+            queueHead--;
+        } else {
+            keepMoving = false;
+        }
 
         break;
 
@@ -737,6 +662,13 @@ void menu(int id) {
         }
         dir = 1;
         keepMoving = false;
+        queueHead = 0;
+
+        break;
+
+    case REAR_VIEW:
+        theta = -40;
+        yViewer = 20;
 
         break;
 
@@ -789,10 +721,7 @@ int main(int argc, char** argv)
     glutAddMenuEntry("• Walk", WALK);
     glutAddMenuEntry("- Go back", GO_BACK);
     glutAddMenuEntry("- Starting position", STARTING_POSITION);
-   /* glutCreateMenu(menu);
-    glutAddMenuEntry("• Cubic Curves", CUBIC_CURVES);
-    glutAddSubMenu("- Bezier", bezierMenu);
-    glutAddMenuEntry("• Cubic Surface", CUBIC_SURFACE);*/
+    glutAddMenuEntry("> Rear View", REAR_VIEW);
     glutAddMenuEntry("Exit", EXIT);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
