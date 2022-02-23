@@ -26,8 +26,9 @@ typedef enum {
     LIFT_FRONT_RIGHT_LEG,
     STAND_ON_BACK_LEGS,
     BEND_NECK_AND_HEAD,
-    BACK_TO_NORMAL,
+    GO_BACK,
     WALK,
+    STARTING_POSITION,
     NOT_MOVING,
     EXIT
 } Mode;
@@ -98,6 +99,14 @@ const GLfloat BACK_LEFT_LOWER_RADIUS = 8.0f;
 const GLfloat BACK_LEFT_LOWER_HEIGHT = 35.0f;
 const GLfloat BACK_LEFT_FOOT_RADIUS = 5.0f;
 const GLfloat BACK_LEFT_FOOT_HEIGHT = 35.0f;
+
+GLfloat initTheta[5][3] = {
+    {  0.0, 0.0,  0.0 },       //torso, neck, head
+    { 90.0, 0.0, 90.0 },        //fru, frl, frf
+    { 90.0, 0.0, 90.0 },
+    { 90.0, 0.0, 90.0 },
+    { 90.0, 0.0, 90.0 },
+};
 
 //nodes' rotation thetas
 GLfloat theta1[5][3] = {
@@ -400,10 +409,10 @@ void bendNeckAndHead() {
 }
 
 void walk() {
-    GLfloat factor = (cos(  -motionFrames / 7.0)       ) / 3;
-    GLfloat factor2 = (cos((-motionFrames / 7.0)-  1)) / 3;
-    GLfloat factor3 = (cos((-motionFrames / 7.0) - 1.5)  ) / 3;
-    GLfloat factor4 = (cos((-motionFrames / 7.0) - 0.5)) / 3;
+    GLfloat factor =  (cos(  -motionFrames / 7.0)    )   / 2;
+    GLfloat factor2 = (cos((-motionFrames / 7.0)-  1))   / 2;
+    GLfloat factor3 = (cos((-motionFrames / 7.0) - 1.5)) / 2;
+    GLfloat factor4 = (cos((-motionFrames / 7.0) - 0.5)) / 2;
 
 
     theta1[1][0] -= 5 * dir * factor;
@@ -425,9 +434,11 @@ void walk() {
     dTorso[0] += 0.5;
     if ((motionFrames % 20) < 10) {
         dTorso[1] += 0.6;
+        theta1[0][0] -= 0.4;
     }
     else {
         dTorso[1] -= 0.6;
+        theta1[0][0] += 0.4;
     }
 
     /*if (motionFrames % 25 == 0) {
@@ -622,6 +633,15 @@ void display()
 
     glColor3f(0.5, 0.5, 0.5);
 
+    GLfloat h = FRONT_RIGHT_UPPER_HEIGHT + FRONT_RIGHT_LOWER_HEIGHT + TORSO_RADIUS + 2*FRONT_RIGHT_FOOT_RADIUS;
+    GLfloat sideLength = 400.0;
+    glBegin(GL_POLYGON);
+    glVertex3f(-sideLength, -h, -sideLength);
+    glVertex3f(-sideLength, -h, sideLength);
+    glVertex3f(sideLength, -h, sideLength);
+    glVertex3f(sideLength, -h, -sideLength);
+    glEnd();
+
     if (keepMoving) {
         switch (motionMode) {
             case LIFT_FRONT_RIGHT_LEG:
@@ -665,35 +685,7 @@ void display()
 }
 
 
-void mouse_callback_func(int button, int state, int x, int y) {
-    //mod mouse x,y to match with world coordinates
-    clickX = x;
-    clickY = maxWindowY - y;
 
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            leftMouseClicked = true;
-        }
-        else if (state == GLUT_UP && leftMouseClicked) {
-            leftMouseClicked = false;
-            movePoint = false;
-        }
-    }
-}
-
-void mouse_motion_callback_func(int x, int y) {
-    if (leftMouseClicked) {
-
-        y = maxWindowY - y;
-
-        printf("(%d, %d)\n", x, y);
-
-        clickX += x - clickX;
-        clickY += y - clickY;
-
-        glutPostRedisplay();
-    }
-}
 
 void menu(int id) {
 
@@ -730,10 +722,21 @@ void menu(int id) {
 
         break;
 
-    case BACK_TO_NORMAL:
+    case GO_BACK:
         dir = -dir;
         keepMoving = true;
         motionFrames = 10;
+
+        break;
+
+    case STARTING_POSITION:
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 3; j++) {
+                theta1[i][j] = initTheta[i][j];
+            }
+        }
+        dir = 1;
+        keepMoving = false;
 
         break;
 
@@ -779,15 +782,13 @@ int main(int argc, char** argv)
     windowId = glutCreateWindow("project1");
     glutDisplayFunc(display);
 
-    glutMouseFunc(mouse_callback_func);
-    glutMotionFunc(mouse_motion_callback_func);
-
     GLint bezierMenu = glutCreateMenu(menu);
     glutAddMenuEntry("• Lift front right leg", LIFT_FRONT_RIGHT_LEG);
     glutAddMenuEntry("• Stand on back legs", STAND_ON_BACK_LEGS);
     glutAddMenuEntry("• Bend neck and head", BEND_NECK_AND_HEAD);
     glutAddMenuEntry("• Walk", WALK);
-    glutAddMenuEntry("• Go back to normal", BACK_TO_NORMAL);
+    glutAddMenuEntry("- Go back", GO_BACK);
+    glutAddMenuEntry("- Starting position", STARTING_POSITION);
    /* glutCreateMenu(menu);
     glutAddMenuEntry("• Cubic Curves", CUBIC_CURVES);
     glutAddSubMenu("- Bezier", bezierMenu);
