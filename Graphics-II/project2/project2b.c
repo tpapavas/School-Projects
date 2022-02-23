@@ -24,31 +24,19 @@ GLint maxWindowX = 640;
 GLint maxWindowY = 480;
 
 typedef enum {
-    LIFT_FRONT_RIGHT_LEG,
-    STAND_ON_BACK_LEGS,
-    BEND_NECK_AND_HEAD,
-    BACK_TO_NORMAL,
-    WALK,
-    NOT_MOVING,
+    SHOW_BOX,
+    WIND,
     EXIT
 } Mode;
 
-//state of the program
-struct State {
-    bool pointsSet;
-    GLint setPointsLeft;
-    Mode mode;
-    GLint numOfPoints;
-    bool showConvex;
-    GLint lim1;     //for convex hull (bezier only)
-    GLint lim2;     //for convex hull (bezier only)
-} currState;
 
 bool leftMouseClicked;
 bool movePoint;  //a point is currently moving
 GLint mvPntInd;  //index of point that has been moved
 GLint clickX;
 GLint clickY;
+
+bool showBox = false;
 
 typedef struct particle {
     GLfloat p[3];
@@ -57,12 +45,13 @@ typedef struct particle {
 } particle;
 
 GLfloat g[3] = { 0.0, -1.0, 0.0 };  //gravity
+GLfloat w[3] = { 0.0, 0.0, 0.0 };  //wind
 
-particle particles[2560];
+particle particles[1024];
 GLint numOfParticles = 0;
 GLint createParticle = 0;
 
-const GLfloat TWO_PI = 2 * M_PI;
+const GLint MAX_PARTICLES = 1024;
 
 void newParticle(GLint i) {
     particles[i].p[0] = 0.0;
@@ -75,7 +64,7 @@ void newParticle(GLint i) {
 
     particles[i].m = 0.5;
 
-    numOfParticles = (numOfParticles+1)% 2560;
+    numOfParticles = (numOfParticles+1)% MAX_PARTICLES;
 }
 
 bool outOfBounds(GLfloat p[3]) {
@@ -120,7 +109,7 @@ void collisionDetection(GLfloat p[3], GLfloat prevPosition[3] ,GLfloat prevVeloc
 GLfloat h = 0.006;
 
 void moveParticles() {
-    for (int i = 0; i < numOfParticles; i++) {
+    for (int i = 0; i < MAX_PARTICLES; i++) {
         GLfloat newPosition[3];
         newPosition[0] = particles[i].p[0] + h * particles[i].v[0];
         newPosition[1] = particles[i].p[1] + h * particles[i].v[1];
@@ -131,7 +120,7 @@ void moveParticles() {
         particles[i].p[1] += h * particles[i].v[1];
         particles[i].p[2] += h * particles[i].v[2];
 
-        particles[i].v[0] += 0; // g[0] / particles[i].m;
+        particles[i].v[0] += w[0]; // g[0] / particles[i].m;
         particles[i].v[1] += h * g[1] / particles[i].m;
         particles[i].v[2] += 0; // g[2] / particles[i].m;
 
@@ -143,9 +132,6 @@ void moveParticles() {
     }
     /*printf("[%.1f %.1f %.1f]\n", particles[1].v[0], particles[1].v[1], particles[1].v[2]);*/
 }
-
-GLint ms = 1;
-clock_t startTime;
 
 void box() {
     glColor4f(0.5, 0.7, 0.5, 0.4);
@@ -168,17 +154,12 @@ void myinit(void)
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MAP1_VERTEX_3);
-    glEnable(GL_BLEND);
 
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     glMatrixMode(GL_MODELVIEW);
 
-
-    /*  glLoadIdentity();
-        gluLookAt(xViewer, yViewer, zViewer, xref, yref, zref, Vx, Vy, Vz);
-
-        */
     glPointSize(2.5);
 
     //glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -189,15 +170,19 @@ void myinit(void)
     glLoadIdentity();
     glOrtho(0, maxWindowX, 0, maxWindowY, -500, 500);
 
-    startTime = clock();
+    //initialize particles to zero
+    for (int i = 0; i < MAX_PARTICLES; i++) {
+        for (int j = 0; j < 3; j++) {
+            particles[i].p[j] = 0;
+            particles[i].v[j] = 0;
+        }
+        particles[i].m = 0;
+    }
 }
-
 
 
 void display()
 {
-
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //for camera
@@ -212,8 +197,7 @@ void display()
     glTranslatef(280, 120, -250);
     //glScalef(2, 2, 2);
 
-    glColor3f(0.5, 0.7, 0.5);
-
+    glColor3f(0.4, 0.6, 0.4);
     glBegin(GL_POLYGON);
     glVertex3f(-200, 0.0, -200);
     glVertex3f(200, 0.0, -200);
@@ -221,20 +205,17 @@ void display()
     glVertex3f(-200, 0.0, 200);
     glEnd();
 
-
     glColor3f(1.0, 1.0, 1.0);
-
     if (!(createParticle % 6)) {
         newParticle(numOfParticles);
         createParticle = 0;
     }
     moveParticles();
     
-    box();
-
+    if (showBox)
+        box();
 
     glutSwapBuffers();
-
     glutPostRedisplay();
 
     createParticle++;
@@ -274,28 +255,14 @@ void mouse_motion_callback_func(int x, int y) {
 void menu(int id) {
 
     switch (id) {
-    case LIFT_FRONT_RIGHT_LEG:
-       
+ 
+    case WIND:
+        w[0] = fabs(w[0] - 0.004);
 
         break;
 
-    case STAND_ON_BACK_LEGS:
-       
-
-        break;
-
-    case BEND_NECK_AND_HEAD:
-      
-
-        break;
-
-    case WALK:
-     
-
-        break;
-
-    case BACK_TO_NORMAL:
-       
+    case SHOW_BOX:
+        showBox = !showBox;
 
         break;
 
@@ -346,11 +313,9 @@ int main(int argc, char** argv)
     glutMotionFunc(mouse_motion_callback_func);
 
     GLint bezierMenu = glutCreateMenu(menu);
-    glutAddMenuEntry("• Lift front right leg", LIFT_FRONT_RIGHT_LEG);
-    glutAddMenuEntry("• Stand on back legs", STAND_ON_BACK_LEGS);
-    glutAddMenuEntry("• Bend neck and head", BEND_NECK_AND_HEAD);
-    glutAddMenuEntry("• Walk", WALK);
-    glutAddMenuEntry("• Go back to normal", BACK_TO_NORMAL);
+    glutAddMenuEntry("• Wind (On/Off)", WIND);
+    glutAddMenuEntry("• Show/Hide box", SHOW_BOX);
+    //glutAddMenuEntry("• Go back to normal", BACK_TO_NORMAL);
     /* glutCreateMenu(menu);
      glutAddMenuEntry("• Cubic Curves", CUBIC_CURVES);
      glutAddSubMenu("- Bezier", bezierMenu);
