@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Inside the Score</string>
+    <string name="home_page">Αρχική Σελίδα</string>
+    <string name="settings_page">Ρυθμίσεις</string>
+    <string name="search_button">Αναζήτηση</string>
+    <string name="language_textview">Γλώσσα εφαρμογής</string>
+    <string name="greek_language_textview">Ελληνικά</string>
+    <string name="english_language_textview">Αγγλικά</string>
+    <string name="search_filter_button">Όλα</string>
+    <string name="clear_button">εκκαθάριση</string>
+    <string name="eras_list_textview">Περίοδοι</string>
+    <string name="composers_list_textview">Συνθέτες</string>
+    <string name="musicworks_list_textview">Μουσικά Έργα</string>
+    <string name="musicwork_year">Έτος</string>
+    <string name="musicwork_title">Τίτλος</string>
+    <string name="musicwork_description">Περιγραφή</string>
+    <string name="locale_textview">Τοποθεσία</string>
+    <string name="viewmode_textview">Λειτουργία προβολής</string>
+    <string name="appearance_textview">Εμφάνιση</string>
+    <string name="select_language_button_text">γλώσσα</string>
+    <string name="search_card_title">Αναζήτηση</string>
+    <string name="library_card_title">Λίστες</string>
+    <string name="favorites_card_title">Αγαπημένα</string>
+    <string name="settings_card_title">Ρυθμίσεις</string>
+
+    <string name="link_to_score_textview">Σύνδεσμος για παρτιτούρα</string>
+    <string name="empty_string"></string>
+</resources>

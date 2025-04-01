@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style
+        name="Widget.Owl.BottomNavigationView"
+        parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
+        <item name="labelVisibilityMode">selected</item>
+        <item name="itemIconTint">@color/bottom_nav_item</item>
+        <item name="itemTextColor">@color/bottom_nav_item</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.InsideTheScore.BottomNavigation</item>
+    </style>
+
+    <style name="Widget.Owl.SeekBar" parent="@style/Widget.AppCompat.SeekBar">
+        <item name="android:progressTint">@color/material_dynamic_primary50</item>
+        <item name="android:secondaryProgressTint">#99ffffff</item>
+        <item name="android:thumbTint">@color/material_dynamic_secondary50</item>
+<!--        <item name="android:progressDrawable">@drawable/seekbar_track</item>-->
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+</resources>

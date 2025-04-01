@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/eras_search_option"
+        android:title="@string/eras_list_textview" />
+
+    <item
+        android:id="@+id/composers_search_option"
+        android:title="@string/composers_list_textview" />
+
+    <item
+        android:id="@+id/musicworks_search_option"
+        android:title="@string/musicworks_list_textview" />
+</menu>

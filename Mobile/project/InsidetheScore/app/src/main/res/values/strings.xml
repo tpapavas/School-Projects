@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Inside the Score</string>
+    <string name="home_page">Home Page</string>
+    <string name="settings_page">Settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <!-- Search page   -->
+    <string name="search_button">Search</string>
+    <string name="search_filter_button">All:</string>
+    <string name="clear_button">clear</string>
+    <string name="help_button"></string>
+<!--    <string name="hello_blank_fragment">Hello blank fragment</string>-->
+
+    <string name="eras_list_textview">Eras</string>
+    <string name="composers_list_textview">Composers</string>
+    <string name="musicworks_list_textview">Music Works</string>
+
+    <!-- Read Music page   -->
+    <string name="musicwork_year">Year</string>
+    <string name="musicwork_title">Title</string>
+    <string name="musicwork_description">Description</string>
+    <string name="link_to_score_textview">Link to score</string>
+
+    <string name="hyperlink">Learn more about Android app development at\n<a href="https://learntodroid.com">LearnToDroid.com</a></string>
+
+    <string name="empty_string"></string>
+
+    <!-- Settings page -->
+    <string name="locale_textview">Locale</string>
+    <string name="language_textview">App language</string>
+    <string name="greek_language_textview">Greek</string>
+    <string name="english_language_textview">English</string>
+    <string name="viewmode_textview">View mode</string>
+    <string name="appearance_textview">Appearance</string>
+    <string name="select_language_button_text">language</string>
+
+    <!--  home page cards  -->
+    <string name="search_card_title">Search</string>
+    <string name="library_card_title">Lists</string>
+    <string name="favorites_card_title">Favorites</string>
+    <string name="settings_card_title">Settings</string>
+</resources>
